@@ -120,22 +120,24 @@ type Job struct {
 	Status JobStatus `json:"status"`
 	// URL is the seed URL.
 	URL string `json:"url"`
+	// URLsQueued is the number of URLs queued.
+	URLsQueued int `json:"urls_queued"`
 	// PageCount is the number of pages processed.
-	PageCount int `json:"pageCount"`
+	PageCount int `json:"page_count"`
 	// TokenUsageInput is input tokens used.
-	TokenUsageInput int `json:"tokenUsageInput"`
+	TokenUsageInput int `json:"token_usage_input"`
 	// TokenUsageOutput is output tokens used.
-	TokenUsageOutput int `json:"tokenUsageOutput"`
-	// CostCredits is the cost in credits.
-	CostCredits float64 `json:"costCredits"`
+	TokenUsageOutput int `json:"token_usage_output"`
+	// CostUSD is the cost in USD.
+	CostUSD float64 `json:"cost_usd"`
 	// ErrorMessage is the error message if failed.
-	ErrorMessage string `json:"errorMessage,omitempty"`
+	ErrorMessage string `json:"error_message,omitempty"`
 	// StartedAt is when the job started.
-	StartedAt string `json:"startedAt,omitempty"`
+	StartedAt string `json:"started_at,omitempty"`
 	// CompletedAt is when the job completed.
-	CompletedAt string `json:"completedAt,omitempty"`
+	CompletedAt string `json:"completed_at,omitempty"`
 	// CreatedAt is when the job was created.
-	CreatedAt string `json:"createdAt"`
+	CreatedAt string `json:"created_at"`
 }
 
 // JobList is a list of jobs.
@@ -274,18 +276,12 @@ type APIKeyCreated struct {
 
 // UsageResponse contains usage statistics.
 type UsageResponse struct {
-	// Tier is the user's tier.
-	Tier string `json:"tier"`
-	// CreditsUsed is credits used this period.
-	CreditsUsed float64 `json:"creditsUsed"`
-	// CreditsLimit is the credit limit.
-	CreditsLimit float64 `json:"creditsLimit"`
-	// CreditsRemaining is credits remaining.
-	CreditsRemaining float64 `json:"creditsRemaining"`
-	// PeriodStart is the period start date.
-	PeriodStart string `json:"periodStart"`
-	// PeriodEnd is the period end date.
-	PeriodEnd string `json:"periodEnd"`
+	// TotalJobs is the total number of jobs.
+	TotalJobs int `json:"total_jobs"`
+	// TotalChargedUSD is the total USD charged for usage.
+	TotalChargedUSD float64 `json:"total_charged_usd"`
+	// BYOKJobs is jobs using user's own API keys (not charged).
+	BYOKJobs int `json:"byok_jobs"`
 }
 
 // LLMConfig contains LLM provider configuration.
