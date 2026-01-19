@@ -1,6 +1,8 @@
 # Refyne SDK for Go
 
-Official Go SDK for the [Refyne API](https://docs.refyne.uk) - LLM-powered web extraction that transforms unstructured websites into clean, typed data.
+Official Go SDK for the [Refyne API](https://refyne.uk/docs) - LLM-powered web extraction that transforms unstructured websites into clean, typed data.
+
+**API Endpoint**: `https://api.refyne.uk` | **Documentation**: [refyne.uk/docs](https://refyne.uk/docs)
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/jmylchreest/refyne-sdk-go.svg)](https://pkg.go.dev/github.com/jmylchreest/refyne-sdk-go)
 [![CI](https://github.com/jmylchreest/refyne-sdk-go/actions/workflows/test.yml/badge.svg)](https://github.com/jmylchreest/refyne-sdk-go/actions/workflows/test.yml)
@@ -218,6 +220,19 @@ if err != nil {
 ## Development
 
 ```bash
+# Generate types from OpenAPI spec (local dev server at http://localhost:8080)
+make generate
+
+# Generate types from production API
+make generate-prod
+
+# Generate types from a local file
+make generate-file
+
+# Or use the generator directly with flags
+go run ./cmd/generate -url https://api.refyne.uk/openapi.json
+go run ./cmd/generate -file ./openapi.json
+
 # Run tests
 go test -v ./...
 
@@ -226,6 +241,28 @@ go test -race ./...
 
 # Run linter
 golangci-lint run
+```
+
+### Type Generation
+
+The types in `types.go` are generated from the OpenAPI specification. To regenerate:
+
+```bash
+# From local development server (default)
+make generate
+
+# From production API
+make generate-prod
+
+# From a downloaded spec file
+make generate-file
+```
+
+You can also use environment variables:
+
+```bash
+OPENAPI_SPEC_URL=https://api.refyne.uk/openapi.json make generate
+OPENAPI_SPEC_FILE=./openapi.json make generate
 ```
 
 ## License

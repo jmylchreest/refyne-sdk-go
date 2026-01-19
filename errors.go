@@ -2,68 +2,92 @@ package refyne
 
 import "fmt"
 
-// RefyneError is the base error type for all SDK errors.
-type RefyneError struct {
-	// Message is the error message.
-	Message string
-	// Status is the HTTP status code.
-	Status int
-	// Detail is additional error detail.
-	Detail string
+// Logger is the interface for custom logging.
+type Logger interface {
+	Debug(msg string, fields map[string]any)
+	Info(msg string, fields map[string]any)
+	Warn(msg string, fields map[string]any)
+	Error(msg string, fields map[string]any)
 }
 
-// Error implements the error interface.
-func (e *RefyneError) Error() string {
+// noopLogger is the default logger that does nothing.
+type noopLogger struct{}
+
+func (n *noopLogger) Debug(msg string, fields map[string]any) {}
+func (n *noopLogger) Info(msg string, fields map[string]any)  {}
+func (n *noopLogger) Warn(msg string, fields map[string]any)  {}
+func (n *noopLogger) Error(msg string, fields map[string]any) {}
+
+// APIError is the base error type for API errors.
+type APIError struct {
+	Message string
+	Status  int
+	Detail  string
+}
+
+func (e *APIError) Error() string {
 	if e.Detail != "" {
 		return fmt.Sprintf("%s: %s", e.Message, e.Detail)
 	}
 	return e.Message
 }
 
-// RateLimitError is returned when rate limited.
-type RateLimitError struct {
-	RefyneError
-	// RetryAfter is seconds to wait before retrying.
-	RetryAfter int
-}
-
-// ValidationError is returned when validation fails.
+// ValidationError is returned when request validation fails.
 type ValidationError struct {
-	RefyneError
-	// Errors contains field-level errors.
-	Errors map[string]string
+	APIError
+	Fields map[string]string
 }
 
-// AuthenticationError is returned when authentication fails.
-type AuthenticationError struct {
-	RefyneError
+func (e *ValidationError) Error() string {
+	return fmt.Sprintf("validation error: %s", e.Message)
 }
 
-// ForbiddenError is returned when access is forbidden.
+// AuthError is returned when authentication fails.
+type AuthError struct {
+	APIError
+}
+
+func (e *AuthError) Error() string {
+	return fmt.Sprintf("authentication error: %s", e.Message)
+}
+
+// ForbiddenError is returned when access is denied.
 type ForbiddenError struct {
-	RefyneError
+	APIError
+}
+
+func (e *ForbiddenError) Error() string {
+	return fmt.Sprintf("forbidden: %s", e.Message)
 }
 
 // NotFoundError is returned when a resource is not found.
 type NotFoundError struct {
-	RefyneError
+	APIError
 }
 
-// UnsupportedAPIVersionError is returned when API version is incompatible.
-type UnsupportedAPIVersionError struct {
-	// APIVersion is the detected API version.
-	APIVersion string
-	// MinVersion is the minimum supported version.
-	MinVersion string
-	// MaxKnownVersion is the maximum known version.
-	MaxKnownVersion string
+func (e *NotFoundError) Error() string {
+	return fmt.Sprintf("not found: %s", e.Message)
 }
 
-// Error implements the error interface.
-func (e *UnsupportedAPIVersionError) Error() string {
-	return fmt.Sprintf(
-		"API version %s is not supported. This SDK requires API version >= %s. "+
-			"Please upgrade the API or use an older SDK version.",
-		e.APIVersion, e.MinVersion,
-	)
+// RateLimitError is returned when rate limit is exceeded.
+type RateLimitError struct {
+	APIError
+	RetryAfter int
+}
+
+func (e *RateLimitError) Error() string {
+	return fmt.Sprintf("rate limit exceeded: %s", e.Message)
+}
+
+// NetworkError is returned when a network error occurs.
+type NetworkError struct {
+	Err error
+}
+
+func (e *NetworkError) Error() string {
+	return fmt.Sprintf("network error: %v", e.Err)
+}
+
+func (e *NetworkError) Unwrap() error {
+	return e.Err
 }

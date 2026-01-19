@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/jmylchreest/refyne-sdk-go"
 )
@@ -24,20 +23,20 @@ func main() {
 		log.Fatal("REFYNE_API_KEY environment variable not set")
 	}
 
-	// Create a client with options
-	client := refyne.NewClient(
-		apiKey,
-		refyne.WithTimeout(60*time.Second),
-		refyne.WithUserAgentSuffix("BasicExample/1.0"),
-	)
+	// Create client with optional custom base URL
+	opts := []refyne.ClientOption{}
+	if baseURL := os.Getenv("REFYNE_BASE_URL"); baseURL != "" {
+		opts = append(opts, refyne.WithBaseURL(baseURL))
+	}
 
+	client := refyne.NewClient(apiKey, opts...)
 	ctx := context.Background()
 
 	fmt.Println("Extracting product data...")
 	fmt.Println()
 
 	// Extract structured data from a page
-	result, err := client.Extract(ctx, refyne.ExtractRequest{
+	result, err := client.Extract(ctx, refyne.ExtractInput{
 		URL: "https://example.com/product/123",
 		Schema: map[string]any{
 			"name":        map[string]any{"type": "string", "description": "Product name"},
@@ -51,24 +50,22 @@ func main() {
 	}
 
 	fmt.Println("Extracted data:")
-	for key, value := range result.Data {
-		fmt.Printf("  %s: %v\n", key, value)
+	if data, ok := result.Data.(map[string]any); ok {
+		for key, value := range data {
+			fmt.Printf("  %s: %v\n", key, value)
+		}
 	}
 
-	fmt.Printf("\nURL: %s\n", result.URL)
+	fmt.Printf("\nURL: %s\n", result.Url)
 	fmt.Printf("Fetched at: %s\n", result.FetchedAt)
 
-	if result.Usage != nil {
-		fmt.Println("\nUsage:")
-		fmt.Printf("  Input tokens: %d\n", result.Usage.InputTokens)
-		fmt.Printf("  Output tokens: %d\n", result.Usage.OutputTokens)
-		fmt.Printf("  Cost: $%.4f\n", result.Usage.CostUSD)
-	}
+	fmt.Println("\nUsage:")
+	fmt.Printf("  Input tokens: %d\n", result.Usage.InputTokens)
+	fmt.Printf("  Output tokens: %d\n", result.Usage.OutputTokens)
+	fmt.Printf("  Cost: $%.4f\n", result.Usage.CostUsd)
 
-	if result.Metadata != nil {
-		fmt.Println("\nPerformance:")
-		fmt.Printf("  Fetch time: %dms\n", result.Metadata.FetchDurationMs)
-		fmt.Printf("  Extract time: %dms\n", result.Metadata.ExtractDurationMs)
-		fmt.Printf("  Model: %s/%s\n", result.Metadata.Provider, result.Metadata.Model)
-	}
+	fmt.Println("\nPerformance:")
+	fmt.Printf("  Fetch time: %dms\n", result.Metadata.FetchDurationMs)
+	fmt.Printf("  Extract time: %dms\n", result.Metadata.ExtractDurationMs)
+	fmt.Printf("  Model: %s/%s\n", result.Metadata.Provider, result.Metadata.Model)
 }

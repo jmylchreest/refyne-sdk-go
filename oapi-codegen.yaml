@@ -1,0 +1,15 @@
+# oapi-codegen configuration for Refyne SDK
+# Generate with: make generate
+#
+# Uses OpenAPI 3.0.3 endpoint for compatibility with oapi-codegen.
+# Documentation: https://refyne.uk/docs
+
+package: refyne
+output: types_gen.go
+
+generate:
+  models: true
+  client: false
+
+output-options:
+  skip-prune: true
