@@ -265,6 +265,32 @@ OPENAPI_SPEC_URL=https://api.refyne.uk/openapi.json make generate
 OPENAPI_SPEC_FILE=./openapi.json make generate
 ```
 
+## Testing with Demo Site
+
+A demo site is available at [demo.refyne.uk](https://demo.refyne.uk) for testing SDK functionality. The site contains realistic data across multiple content types:
+
+| Endpoint | Content Type | Example Use Case |
+|----------|--------------|------------------|
+| `https://demo.refyne.uk/products` | Product catalog | Extract prices, descriptions, ratings |
+| `https://demo.refyne.uk/jobs` | Job listings | Extract salaries, requirements, companies |
+| `https://demo.refyne.uk/blog` | Blog posts | Extract articles, authors, tags |
+| `https://demo.refyne.uk/news` | News articles | Extract headlines, sources, timestamps |
+
+Example:
+
+```go
+result, err := client.Extract(context.Background(), refyne.ExtractRequest{
+    URL: "https://demo.refyne.uk/products/1",
+    Schema: map[string]any{
+        "name":        "string",
+        "price":       "number",
+        "description": "string",
+        "brand":       "string",
+        "rating":      "number",
+    },
+})
+```
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
