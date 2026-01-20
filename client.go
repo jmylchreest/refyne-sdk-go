@@ -32,7 +32,7 @@ import (
 
 // Version constants
 const (
-	SDKVersion        = "0.1.0"
+	SDKVersion        = "0.0.1"
 	DefaultBaseURL    = "https://api.refyne.uk"
 	DefaultTimeout    = 30 * time.Second
 	DefaultMaxRetries = 3
