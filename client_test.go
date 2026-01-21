@@ -73,7 +73,7 @@ func TestAuthenticationHeader(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		capturedAuth = r.Header.Get("Authorization")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"total_jobs":        0,
 			"total_charged_usd": 0,
 			"byok_jobs":         0,
@@ -99,7 +99,7 @@ func TestUserAgentHeader(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		capturedUA = r.Header.Get("User-Agent")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"total_jobs":        0,
 			"total_charged_usd": 0,
 			"byok_jobs":         0,
@@ -129,13 +129,13 @@ func TestExtract(t *testing.T) {
 		}
 
 		var body map[string]any
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		if body["url"] != "https://example.com" {
 			t.Errorf("expected url 'https://example.com', got '%v'", body["url"])
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"data":       map[string]any{"title": "Test"},
 			"url":        "https://example.com",
 			"fetched_at": "2024-01-01T00:00:00Z",
@@ -175,7 +175,7 @@ func TestCrawl(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"job_id": "job-123",
 			"status": "pending",
 		})
@@ -206,7 +206,7 @@ func TestJobsList(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"jobs":  []any{},
 			"total": 0,
 		})
@@ -228,7 +228,7 @@ func TestJobsGet(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"id":                 "job-123",
 			"type":               "crawl",
 			"status":             "completed",
@@ -256,7 +256,7 @@ func TestError400(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"error":  "validation failed",
 			"errors": map[string]string{"url": "required"},
 		})
@@ -283,7 +283,7 @@ func TestError401(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(map[string]any{"error": "invalid token"})
+		_ = json.NewEncoder(w).Encode(map[string]any{"error": "invalid token"})
 	}))
 	defer server.Close()
 
@@ -307,7 +307,7 @@ func TestError403(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(map[string]any{"error": "forbidden"})
+		_ = json.NewEncoder(w).Encode(map[string]any{"error": "forbidden"})
 	}))
 	defer server.Close()
 
@@ -328,7 +328,7 @@ func TestError404(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]any{"error": "not found"})
+		_ = json.NewEncoder(w).Encode(map[string]any{"error": "not found"})
 	}))
 	defer server.Close()
 
@@ -354,11 +354,11 @@ func TestError429RateLimitWithRetry(t *testing.T) {
 			w.Header().Set("Retry-After", "0")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusTooManyRequests)
-			json.NewEncoder(w).Encode(map[string]any{"error": "rate limited"})
+			_ = json.NewEncoder(w).Encode(map[string]any{"error": "rate limited"})
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"total_jobs":        0,
 			"total_charged_usd": 0,
 			"byok_jobs":         0,
@@ -385,11 +385,11 @@ func TestError500WithRetry(t *testing.T) {
 		if attempts < 2 {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]any{"error": "internal error"})
+			_ = json.NewEncoder(w).Encode(map[string]any{"error": "internal error"})
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"total_jobs":        0,
 			"total_charged_usd": 0,
 			"byok_jobs":         0,
@@ -414,21 +414,21 @@ func TestSchemasCRUD(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/schemas":
-			json.NewEncoder(w).Encode(map[string]any{"schemas": []any{}})
+			_ = json.NewEncoder(w).Encode(map[string]any{"schemas": []any{}})
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/schemas":
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":          "schema-1",
 				"name":        "Test",
 				"schema_yaml": "type: object",
 			})
 		case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/v1/schemas/"):
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":          "schema-1",
 				"name":        "Test",
 				"schema_yaml": "type: object",
 			})
 		case r.Method == http.MethodPut && strings.HasPrefix(r.URL.Path, "/api/v1/schemas/"):
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":          "schema-1",
 				"name":        "Updated",
 				"schema_yaml": "type: object",
@@ -491,21 +491,21 @@ func TestSitesCRUD(t *testing.T) {
 
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/sites":
-			json.NewEncoder(w).Encode(map[string]any{"sites": []any{}})
+			_ = json.NewEncoder(w).Encode(map[string]any{"sites": []any{}})
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/sites":
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":   "site-1",
 				"name": "Test Site",
 				"url":  "https://example.com",
 			})
 		case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/v1/sites/"):
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":   "site-1",
 				"name": "Test Site",
 				"url":  "https://example.com",
 			})
 		case r.Method == http.MethodPut && strings.HasPrefix(r.URL.Path, "/api/v1/sites/"):
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":   "site-1",
 				"name": "Updated Site",
 				"url":  "https://example.com",
@@ -568,27 +568,27 @@ func TestLLMOperations(t *testing.T) {
 
 		switch {
 		case r.URL.Path == "/api/v1/llm/providers":
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"providers": []any{
 					map[string]any{"id": "anthropic", "name": "Anthropic"},
 					map[string]any{"id": "openai", "name": "OpenAI"},
 				},
 			})
 		case strings.HasPrefix(r.URL.Path, "/api/v1/llm/models/"):
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"models": []any{
 					map[string]any{"id": "model-1", "name": "Model 1"},
 				},
 			})
 		case r.URL.Path == "/api/v1/llm/keys" && r.Method == http.MethodGet:
-			json.NewEncoder(w).Encode(map[string]any{"keys": []any{}})
+			_ = json.NewEncoder(w).Encode(map[string]any{"keys": []any{}})
 		case r.URL.Path == "/api/v1/llm/keys" && r.Method == http.MethodPut:
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":       "key-1",
 				"provider": "anthropic",
 			})
 		case r.URL.Path == "/api/v1/llm/chain" && r.Method == http.MethodGet:
-			json.NewEncoder(w).Encode(map[string]any{"chain": []any{}})
+			_ = json.NewEncoder(w).Encode(map[string]any{"chain": []any{}})
 		case r.URL.Path == "/api/v1/llm/chain" && r.Method == http.MethodPut:
 			w.WriteHeader(http.StatusOK)
 		}

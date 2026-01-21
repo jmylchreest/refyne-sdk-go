@@ -26,7 +26,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -45,9 +44,7 @@ type Client struct {
 	httpClient *http.Client
 	timeout    time.Duration
 	maxRetries int
-	logger     Logger
-
-	mu sync.RWMutex
+	logger Logger
 
 	// Sub-clients for organized API access
 	Jobs    *JobsClient
