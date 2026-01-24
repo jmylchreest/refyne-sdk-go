@@ -14,6 +14,20 @@ const (
 	AnalyzeInputBodyFetchModeStatic  AnalyzeInputBodyFetchMode = "static"
 )
 
+// Defines values for CleanerOptionsInputOutput.
+const (
+	CleanerOptionsInputOutputHtml     CleanerOptionsInputOutput = "html"
+	CleanerOptionsInputOutputMarkdown CleanerOptionsInputOutput = "markdown"
+	CleanerOptionsInputOutputText     CleanerOptionsInputOutput = "text"
+)
+
+// Defines values for CleanerOptionsInputPreset.
+const (
+	CleanerOptionsInputPresetAggressive CleanerOptionsInputPreset = "aggressive"
+	CleanerOptionsInputPresetDefault    CleanerOptionsInputPreset = "default"
+	CleanerOptionsInputPresetMinimal    CleanerOptionsInputPreset = "minimal"
+)
+
 // Defines values for CreateSavedSiteInputBodyFetchMode.
 const (
 	CreateSavedSiteInputBodyFetchModeAuto    CreateSavedSiteInputBodyFetchMode = "auto"
@@ -40,6 +54,20 @@ const (
 	FallbackChainEntryInputProviderOllama     FallbackChainEntryInputProvider = "ollama"
 	FallbackChainEntryInputProviderOpenai     FallbackChainEntryInputProvider = "openai"
 	FallbackChainEntryInputProviderOpenrouter FallbackChainEntryInputProvider = "openrouter"
+)
+
+// Defines values for JobCleanerOptionsInputOutput.
+const (
+	JobCleanerOptionsInputOutputHtml     JobCleanerOptionsInputOutput = "html"
+	JobCleanerOptionsInputOutputMarkdown JobCleanerOptionsInputOutput = "markdown"
+	JobCleanerOptionsInputOutputText     JobCleanerOptionsInputOutput = "text"
+)
+
+// Defines values for JobCleanerOptionsInputPreset.
+const (
+	JobCleanerOptionsInputPresetAggressive JobCleanerOptionsInputPreset = "aggressive"
+	JobCleanerOptionsInputPresetDefault    JobCleanerOptionsInputPreset = "default"
+	JobCleanerOptionsInputPresetMinimal    JobCleanerOptionsInputPreset = "minimal"
 )
 
 // Defines values for LLMConfigInputProvider.
@@ -91,6 +119,7 @@ const (
 const (
 	Json  GetJobResultsRawParamsFormat = "json"
 	Jsonl GetJobResultsRawParamsFormat = "jsonl"
+	Yaml  GetJobResultsRawParamsFormat = "yaml"
 )
 
 // Defines values for GetUsageParamsPeriod.
@@ -110,6 +139,18 @@ type APIKeyResponse struct {
 	LastUsedAt *string   `json:"last_used_at,omitempty"`
 	Name       string    `json:"name"`
 	Scopes     *[]string `json:"scopes"`
+}
+
+// AdminJobResultsOutputBody defines model for AdminJobResultsOutputBody.
+type AdminJobResultsOutputBody struct {
+	// DownloadUrl Presigned URL to download results (valid for 1 hour)
+	DownloadUrl string `json:"download_url"`
+
+	// ExpiresAt URL expiration time
+	ExpiresAt string `json:"expires_at"`
+
+	// JobId Job ID
+	JobId string `json:"job_id"`
 }
 
 // AnalysisResultInput defines model for AnalysisResultInput.
@@ -160,8 +201,32 @@ type AnalysisResultOutput struct {
 	SuggestedSchema string `json:"suggested_schema"`
 }
 
+// AnalyticsJobResponse defines model for AnalyticsJobResponse.
+type AnalyticsJobResponse struct {
+	CompletedAt     *string `json:"completed_at,omitempty"`
+	CostUsd         float64 `json:"cost_usd"`
+	CreatedAt       string  `json:"created_at"`
+	DiscoveryMethod *string `json:"discovery_method,omitempty"`
+	ErrorCategory   *string `json:"error_category,omitempty"`
+	ErrorMessage    *string `json:"error_message,omitempty"`
+	Id              string  `json:"id"`
+	IsByok          bool    `json:"is_byok"`
+	LlmCostUsd      float64 `json:"llm_cost_usd"`
+	Model           *string `json:"model,omitempty"`
+	Provider        *string `json:"provider,omitempty"`
+	Status          string  `json:"status"`
+	TokensInput     int64   `json:"tokens_input"`
+	TokensOutput    int64   `json:"tokens_output"`
+	Type            string  `json:"type"`
+	Url             string  `json:"url"`
+	UserId          string  `json:"user_id"`
+}
+
 // AnalyzeInputBody defines model for AnalyzeInputBody.
 type AnalyzeInputBody struct {
+	// Debug Capture debug information (LLM prompts/responses). Defaults to true for analyze jobs.
+	Debug *bool `json:"debug,omitempty"`
+
 	// Depth Crawl depth: 0=single page, 1=one level deep
 	Depth *int64 `json:"depth,omitempty"`
 
@@ -203,6 +268,91 @@ type AnalyzeResponseBody struct {
 
 	// SuggestedSchema YAML schema suggestion for extraction
 	SuggestedSchema string `json:"suggested_schema"`
+}
+
+// CleanerChainItemResponse defines model for CleanerChainItemResponse.
+type CleanerChainItemResponse struct {
+	// Name Cleaner name
+	Name string `json:"name"`
+}
+
+// CleanerConfigInput defines model for CleanerConfigInput.
+type CleanerConfigInput struct {
+	// Name Cleaner name (noop, markdown, trafilatura, readability)
+	Name    string               `json:"name"`
+	Options *CleanerOptionsInput `json:"options,omitempty"`
+}
+
+// CleanerOptionResponse defines model for CleanerOptionResponse.
+type CleanerOptionResponse struct {
+	// Default Default value if not specified
+	Default interface{} `json:"default"`
+
+	// Description Description of what this option does
+	Description string `json:"description"`
+
+	// Name Option name (e.g., 'output', 'tables')
+	Name string `json:"name"`
+
+	// Type Option type (string, boolean)
+	Type string `json:"type"`
+}
+
+// CleanerOptionsInput defines model for CleanerOptionsInput.
+type CleanerOptionsInput struct {
+	// BaseUrl Base URL for resolving relative links (readability, refyne)
+	BaseUrl *string `json:"base_url,omitempty"`
+
+	// ExtractHeadings Extract heading structure to frontmatter (refyne markdown)
+	ExtractHeadings *bool `json:"extract_headings,omitempty"`
+
+	// ExtractImages Extract images to frontmatter with {{IMG_001}} placeholders (refyne markdown)
+	ExtractImages *bool `json:"extract_images,omitempty"`
+
+	// Images Include images in output (trafilatura)
+	Images *bool `json:"images,omitempty"`
+
+	// IncludeFrontmatter Prepend YAML frontmatter with metadata (refyne markdown output)
+	IncludeFrontmatter *bool `json:"include_frontmatter,omitempty"`
+
+	// KeepSelectors CSS selectors for elements to always keep (refyne)
+	KeepSelectors *[]string `json:"keep_selectors"`
+
+	// Links Include links in output (trafilatura)
+	Links *bool `json:"links,omitempty"`
+
+	// Output Output format (trafilatura, readability, refyne)
+	Output *CleanerOptionsInputOutput `json:"output,omitempty"`
+
+	// Preset Refyne preset: default, minimal, or aggressive
+	Preset *CleanerOptionsInputPreset `json:"preset,omitempty"`
+
+	// RemoveSelectors CSS selectors for elements to remove (refyne)
+	RemoveSelectors *[]string `json:"remove_selectors"`
+
+	// ResolveUrls Resolve relative URLs to absolute using base_url (refyne)
+	ResolveUrls *bool `json:"resolve_urls,omitempty"`
+
+	// Tables Include tables in output (trafilatura)
+	Tables *bool `json:"tables,omitempty"`
+}
+
+// CleanerOptionsInputOutput Output format (trafilatura, readability, refyne)
+type CleanerOptionsInputOutput string
+
+// CleanerOptionsInputPreset Refyne preset: default, minimal, or aggressive
+type CleanerOptionsInputPreset string
+
+// CleanerResponse defines model for CleanerResponse.
+type CleanerResponse struct {
+	// Description Description of what this cleaner does
+	Description string `json:"description"`
+
+	// Name Cleaner name to use in cleaner_chain
+	Name string `json:"name"`
+
+	// Options Available options for this cleaner
+	Options *[]CleanerOptionResponse `json:"options"`
 }
 
 // CrawlInlineWebhookInput defines model for CrawlInlineWebhookInput.
@@ -376,10 +526,12 @@ type CrawlWebhookHeaderInput struct {
 
 // CreateCrawlJobInputBody defines model for CreateCrawlJobInputBody.
 type CreateCrawlJobInputBody struct {
-	LlmConfig *LLMConfigInput `json:"llm_config,omitempty"`
-	Options   *CrawlOptions   `json:"options,omitempty"`
+	// CleanerChain Content cleaner chain (default: [markdown])
+	CleanerChain *[]JobCleanerConfigInput `json:"cleaner_chain"`
+	LlmConfig    *LLMConfigInput          `json:"llm_config,omitempty"`
+	Options      *CrawlOptions            `json:"options,omitempty"`
 
-	// Schema JSON Schema defining the data structure to extract. Example: {"name":"string","price":"number","description":"string"}
+	// Schema Extraction instructions - either a structured schema (YAML/JSON with 'name' and 'fields') or freeform natural language prompt. The API auto-detects the format.
 	Schema interface{} `json:"schema"`
 
 	// Url Seed URL to start crawling from
@@ -481,6 +633,71 @@ type CreateSchemaInputBody struct {
 // CreateSchemaInputBodyVisibility Schema visibility
 type CreateSchemaInputBodyVisibility string
 
+// DebugCaptureEntry defines model for DebugCaptureEntry.
+type DebugCaptureEntry struct {
+	// HintsApplied Preprocessing hints applied
+	HintsApplied *map[string]string `json:"hints_applied,omitempty"`
+
+	// Id Capture ID
+	Id string `json:"id"`
+
+	// JobType Job type (analyze, extract, crawl)
+	JobType string `json:"job_type"`
+
+	// Prompt Full prompt sent to LLM (for analyze jobs)
+	Prompt *string `json:"prompt,omitempty"`
+
+	// RawContent Page content (for extract/crawl jobs)
+	RawContent *string                 `json:"raw_content,omitempty"`
+	Request    DebugCaptureLLMRequest  `json:"request"`
+	Response   DebugCaptureLLMResponse `json:"response"`
+
+	// Schema Schema used for extraction
+	Schema *string `json:"schema,omitempty"`
+
+	// Timestamp When the request was made
+	Timestamp string `json:"timestamp"`
+
+	// Url Page URL being processed
+	Url string `json:"url"`
+}
+
+// DebugCaptureLLMRequest defines model for DebugCaptureLLMRequest.
+type DebugCaptureLLMRequest struct {
+	// ContentSize Size of content sent to LLM
+	ContentSize int64 `json:"content_size"`
+
+	// FetchMode Content fetch mode
+	FetchMode *string `json:"fetch_mode,omitempty"`
+
+	// Model LLM model used
+	Model string `json:"model"`
+
+	// PromptSize Total prompt size including system instructions
+	PromptSize int64 `json:"prompt_size"`
+
+	// Provider LLM provider used
+	Provider string `json:"provider"`
+}
+
+// DebugCaptureLLMResponse defines model for DebugCaptureLLMResponse.
+type DebugCaptureLLMResponse struct {
+	// DurationMs Request duration in milliseconds
+	DurationMs int64 `json:"duration_ms"`
+
+	// Error Error message if failed
+	Error *string `json:"error,omitempty"`
+
+	// InputTokens Input tokens consumed
+	InputTokens int64 `json:"input_tokens"`
+
+	// OutputTokens Output tokens generated
+	OutputTokens int64 `json:"output_tokens"`
+
+	// Success Whether the request succeeded
+	Success bool `json:"success"`
+}
+
 // DeleteSavedSiteOutputBody defines model for DeleteSavedSiteOutputBody.
 type DeleteSavedSiteOutputBody struct {
 	// Success Whether deletion was successful
@@ -539,6 +756,14 @@ type DetectedElementOutput struct {
 	Type string `json:"type"`
 }
 
+// ErrorCategoryResponse defines model for ErrorCategoryResponse.
+type ErrorCategoryResponse struct {
+	Category       string    `json:"category"`
+	Count          int64     `json:"count"`
+	Percentage     float64   `json:"percentage"`
+	SampleMessages *[]string `json:"sample_messages"`
+}
+
 // ErrorDetail defines model for ErrorDetail.
 type ErrorDetail struct {
 	// Location Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'
@@ -586,11 +811,14 @@ type ErrorSummary struct {
 
 // ExtractInputBody defines model for ExtractInputBody.
 type ExtractInputBody struct {
+	// CleanerChain Content cleaner chain (default: [markdown])
+	CleanerChain *[]CleanerConfigInput `json:"cleaner_chain"`
+
 	// FetchMode Fetch mode: auto, static, or dynamic
 	FetchMode *ExtractInputBodyFetchMode `json:"fetch_mode,omitempty"`
 	LlmConfig *LLMConfigInput            `json:"llm_config,omitempty"`
 
-	// Schema Schema defining the data structure to extract (JSON or YAML format)
+	// Schema Extraction instructions - either a structured schema (YAML/JSON with 'name' and 'fields') or freeform natural language prompt. The API auto-detects the format and returns 'input_format' in the response.
 	Schema interface{} `json:"schema"`
 
 	// Url URL to extract data from
@@ -615,6 +843,9 @@ type ExtractOutputBody struct {
 	// FetchedAt Timestamp when the page was fetched
 	FetchedAt string `json:"fetched_at"`
 
+	// InputFormat How the input was interpreted: 'schema' (structured YAML/JSON) or 'prompt' (freeform text)
+	InputFormat string `json:"input_format"`
+
 	// JobId Job ID for this extraction (for history/tracking)
 	JobId    string           `json:"job_id"`
 	Metadata MetadataResponse `json:"metadata"`
@@ -622,6 +853,12 @@ type ExtractOutputBody struct {
 	// Url URL that was extracted
 	Url   string        `json:"url"`
 	Usage UsageResponse `json:"usage"`
+}
+
+// FailingURLResponse defines model for FailingURLResponse.
+type FailingURLResponse struct {
+	Count int64  `json:"count"`
+	Url   string `json:"url"`
 }
 
 // FallbackChainEntryInput defines model for FallbackChainEntryInput.
@@ -683,6 +920,18 @@ type FollowPatternOutput struct {
 	SampleUrls *[]string `json:"sample_urls"`
 }
 
+// GetAnalyticsJobsOutputBody defines model for GetAnalyticsJobsOutputBody.
+type GetAnalyticsJobsOutputBody struct {
+	Jobs       *[]AnalyticsJobResponse `json:"jobs"`
+	TotalCount int64                   `json:"total_count"`
+}
+
+// GetAnalyticsUsersOutputBody defines model for GetAnalyticsUsersOutputBody.
+type GetAnalyticsUsersOutputBody struct {
+	TotalCount int64                  `json:"total_count"`
+	Users      *[]UserSummaryResponse `json:"users"`
+}
+
 // GetCrawlMapOutputBody defines model for GetCrawlMapOutputBody.
 type GetCrawlMapOutputBody struct {
 	// Completed Number of successfully completed pages
@@ -708,10 +957,29 @@ type GetCrawlMapOutputBody struct {
 	Total int64 `json:"total"`
 }
 
+// GetErrorsOutputBody defines model for GetErrorsOutputBody.
+type GetErrorsOutputBody struct {
+	ByCategory     *[]ErrorCategoryResponse `json:"by_category"`
+	ByProvider     *[]ProviderErrorResponse `json:"by_provider"`
+	TopFailingUrls *[]FailingURLResponse    `json:"top_failing_urls"`
+}
+
 // GetFallbackChainOutputBody defines model for GetFallbackChainOutputBody.
 type GetFallbackChainOutputBody struct {
 	Chain *[]FallbackChainEntryResponse `json:"chain"`
 	Tiers *[]string                     `json:"tiers"`
+}
+
+// GetJobDebugCaptureOutputBody defines model for GetJobDebugCaptureOutputBody.
+type GetJobDebugCaptureOutputBody struct {
+	// Captures Captured LLM requests
+	Captures *[]DebugCaptureEntry `json:"captures"`
+
+	// Enabled Whether debug capture was enabled for this job
+	Enabled bool `json:"enabled"`
+
+	// JobId Job ID
+	JobId string `json:"job_id"`
 }
 
 // GetJobResultsDownloadOutputBody defines model for GetJobResultsDownloadOutputBody.
@@ -733,6 +1001,11 @@ type GetJobWebhookDeliveriesOutputBody struct {
 
 	// JobId Job ID
 	JobId string `json:"job_id"`
+}
+
+// GetTrendsOutputBody defines model for GetTrendsOutputBody.
+type GetTrendsOutputBody struct {
+	Trends *[]TrendPointResponse `json:"trends"`
 }
 
 // GetUsageOutputBody defines model for GetUsageOutputBody.
@@ -773,8 +1046,61 @@ type InlineWebhookInput struct {
 	Url string `json:"url"`
 }
 
+// JobCleanerConfigInput defines model for JobCleanerConfigInput.
+type JobCleanerConfigInput struct {
+	// Name Cleaner name (noop, markdown, trafilatura, readability)
+	Name    string                  `json:"name"`
+	Options *JobCleanerOptionsInput `json:"options,omitempty"`
+}
+
+// JobCleanerOptionsInput defines model for JobCleanerOptionsInput.
+type JobCleanerOptionsInput struct {
+	// BaseUrl Base URL for resolving relative links (readability, refyne)
+	BaseUrl *string `json:"base_url,omitempty"`
+
+	// ExtractHeadings Extract heading structure to frontmatter (refyne markdown)
+	ExtractHeadings *bool `json:"extract_headings,omitempty"`
+
+	// ExtractImages Extract images to frontmatter with {{IMG_001}} placeholders (refyne markdown)
+	ExtractImages *bool `json:"extract_images,omitempty"`
+
+	// Images Include images in output (trafilatura)
+	Images *bool `json:"images,omitempty"`
+
+	// IncludeFrontmatter Prepend YAML frontmatter with metadata (refyne markdown output)
+	IncludeFrontmatter *bool `json:"include_frontmatter,omitempty"`
+
+	// KeepSelectors CSS selectors for elements to always keep (refyne)
+	KeepSelectors *[]string `json:"keep_selectors"`
+
+	// Links Include links in output (trafilatura)
+	Links *bool `json:"links,omitempty"`
+
+	// Output Output format (trafilatura, readability, refyne)
+	Output *JobCleanerOptionsInputOutput `json:"output,omitempty"`
+
+	// Preset Refyne preset: default, minimal, or aggressive
+	Preset *JobCleanerOptionsInputPreset `json:"preset,omitempty"`
+
+	// RemoveSelectors CSS selectors for elements to remove (refyne)
+	RemoveSelectors *[]string `json:"remove_selectors"`
+
+	// ResolveUrls Resolve relative URLs to absolute using base_url (refyne)
+	ResolveUrls *bool `json:"resolve_urls,omitempty"`
+
+	// Tables Include tables in output (trafilatura)
+	Tables *bool `json:"tables,omitempty"`
+}
+
+// JobCleanerOptionsInputOutput Output format (trafilatura, readability, refyne)
+type JobCleanerOptionsInputOutput string
+
+// JobCleanerOptionsInputPreset Refyne preset: default, minimal, or aggressive
+type JobCleanerOptionsInputPreset string
+
 // JobResponse defines model for JobResponse.
 type JobResponse struct {
+	CaptureDebug     bool    `json:"capture_debug"`
 	CompletedAt      *string `json:"completed_at,omitempty"`
 	CostUsd          float64 `json:"cost_usd"`
 	CreatedAt        string  `json:"created_at"`
@@ -852,6 +1178,18 @@ type LLMConfigInputProvider string
 type ListAllSchemasOutputBody struct {
 	// Schemas List of all schemas
 	Schemas *[]SchemaOutput `json:"schemas"`
+}
+
+// ListCleanersOutputBody defines model for ListCleanersOutputBody.
+type ListCleanersOutputBody struct {
+	// Cleaners List of available cleaners
+	Cleaners *[]CleanerResponse `json:"cleaners"`
+
+	// DefaultAnalysisChain Default cleaner chain for analysis operations
+	DefaultAnalysisChain *[]CleanerChainItemResponse `json:"default_analysis_chain"`
+
+	// DefaultExtractionChain Default cleaner chain for extraction operations
+	DefaultExtractionChain *[]CleanerChainItemResponse `json:"default_extraction_chain"`
 }
 
 // ListJobsOutputBody defines model for ListJobsOutputBody.
@@ -957,6 +1295,46 @@ type ModelValidationResponse struct {
 	Status   string  `json:"status"`
 }
 
+// OverviewResponse defines model for OverviewResponse.
+type OverviewResponse struct {
+	// ActiveUsers Number of unique users with jobs
+	ActiveUsers int64 `json:"active_users"`
+
+	// ByokJobs Jobs using user API keys
+	ByokJobs int64 `json:"byok_jobs"`
+
+	// CompletedJobs Number of completed jobs
+	CompletedJobs int64 `json:"completed_jobs"`
+
+	// ErrorRate Error rate percentage
+	ErrorRate float64 `json:"error_rate"`
+
+	// FailedJobs Number of failed jobs
+	FailedJobs int64 `json:"failed_jobs"`
+
+	// PlatformJobs Jobs using platform API keys
+	PlatformJobs int64 `json:"platform_jobs"`
+
+	// TotalCostUsd Total cost in USD
+	TotalCostUsd float64 `json:"total_cost_usd"`
+
+	// TotalJobs Total number of jobs
+	TotalJobs int64 `json:"total_jobs"`
+
+	// TotalTokensInput Total input tokens
+	TotalTokensInput int64 `json:"total_tokens_input"`
+
+	// TotalTokensOutput Total output tokens
+	TotalTokensOutput int64 `json:"total_tokens_output"`
+}
+
+// ProviderErrorResponse defines model for ProviderErrorResponse.
+type ProviderErrorResponse struct {
+	Count    int64  `json:"count"`
+	Model    string `json:"model"`
+	Provider string `json:"provider"`
+}
+
 // ProviderInfo defines model for ProviderInfo.
 type ProviderInfo struct {
 	BaseUrlHint      *string   `json:"base_url_hint,omitempty"`
@@ -991,6 +1369,9 @@ type RevokeKeyOutputBody struct {
 
 // SSECompleteEvent defines model for SSECompleteEvent.
 type SSECompleteEvent struct {
+	// CostUsd Total cost in USD
+	CostUsd *float64 `json:"cost_usd,omitempty"`
+
 	// ErrorCategory Error category if job failed
 	ErrorCategory *string `json:"error_category,omitempty"`
 
@@ -1002,6 +1383,9 @@ type SSECompleteEvent struct {
 
 	// PageCount Total pages processed
 	PageCount int64 `json:"page_count"`
+
+	// ResultsUrl URL to fetch full results
+	ResultsUrl string `json:"results_url"`
 
 	// Status Final job status
 	Status string `json:"status"`
@@ -1015,9 +1399,6 @@ type SSEErrorEvent struct {
 
 // SSEResultEvent defines model for SSEResultEvent.
 type SSEResultEvent struct {
-	// Data Extracted data matching the schema
-	Data interface{} `json:"data,omitempty"`
-
 	// ErrorCategory Error category if failed
 	ErrorCategory *string `json:"error_category,omitempty"`
 
@@ -1251,6 +1632,15 @@ type TokenUsage struct {
 	Output int64 `json:"output"`
 }
 
+// TrendPointResponse defines model for TrendPointResponse.
+type TrendPointResponse struct {
+	CostUsd    float64 `json:"cost_usd"`
+	Date       string  `json:"date"`
+	ErrorCount int64   `json:"error_count"`
+	JobCount   int64   `json:"job_count"`
+	Tokens     int64   `json:"tokens"`
+}
+
 // UpdateSavedSiteInputBody defines model for UpdateSavedSiteInputBody.
 type UpdateSavedSiteInputBody struct {
 	AnalysisResult *AnalysisResultInput `json:"analysis_result,omitempty"`
@@ -1389,6 +1779,17 @@ type UserServiceKeyResponse struct {
 	IsEnabled bool    `json:"is_enabled"`
 	Provider  string  `json:"provider"`
 	UpdatedAt string  `json:"updated_at"`
+}
+
+// UserSummaryResponse defines model for UserSummaryResponse.
+type UserSummaryResponse struct {
+	CompletedJobs int64   `json:"completed_jobs"`
+	FailedJobs    int64   `json:"failed_jobs"`
+	LastActive    *string `json:"last_active,omitempty"`
+	TotalCostUsd  float64 `json:"total_cost_usd"`
+	TotalJobs     int64   `json:"total_jobs"`
+	TotalTokens   int64   `json:"total_tokens"`
+	UserId        string  `json:"user_id"`
 }
 
 // ValidateModelsInputBody defines model for ValidateModelsInputBody.
