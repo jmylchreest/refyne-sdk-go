@@ -1,0 +1,106 @@
+version: '3'
+
+vars:
+  OPENAPI_SPEC_URL: '{{.OPENAPI_SPEC_URL | default "http://localhost:8080/openapi-3.0.json"}}'
+  OPENAPI_PROD_URL: https://api.refyne.uk/openapi-3.0.json
+
+tasks:
+  # ============================================
+  # Dependencies
+  # ============================================
+  deps:
+    desc: Download Go dependencies
+    cmds:
+      - go mod tidy
+      - go mod download
+
+  deps:update:
+    desc: Update dependencies within compatible versions (safe)
+    cmds:
+      - go get -u=patch ./...
+      - go mod tidy
+
+  deps:upgrade:
+    desc: Upgrade dependencies to latest versions
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+
+  # ============================================
+  # Code generation
+  # ============================================
+  generate:
+    desc: Generate types from OpenAPI spec (local server by default)
+    cmds:
+      - echo "Generating types from {{.OPENAPI_SPEC_URL}}..."
+      - oapi-codegen -config oapi-codegen.yaml {{.OPENAPI_SPEC_URL}}
+      - echo "Done. Generated types_gen.go"
+
+  generate:prod:
+    desc: Generate types from production API
+    cmds:
+      - echo "Generating types from {{.OPENAPI_PROD_URL}}..."
+      - oapi-codegen -config oapi-codegen.yaml {{.OPENAPI_PROD_URL}}
+      - echo "Done. Generated types_gen.go"
+
+  # ============================================
+  # Testing
+  # ============================================
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v ./...
+
+  test:race:
+    desc: Run tests with race detection
+    cmds:
+      - go test -race ./...
+
+  test:coverage:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report: coverage.html"
+
+  # ============================================
+  # Linting & Formatting
+  # ============================================
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run
+
+  lint:fix:
+    desc: Run linter with auto-fix
+    cmds:
+      - golangci-lint run --fix
+
+  fmt:
+    desc: Format code
+    cmds:
+      - go fmt ./...
+      - goimports -w . 2>/dev/null || echo "goimports not installed, skipping"
+
+  # ============================================
+  # Build & Install
+  # ============================================
+  build:
+    desc: Build examples
+    cmds:
+      - go build ./examples/...
+
+  # ============================================
+  # Combined tasks
+  # ============================================
+  check:
+    desc: Run all checks (fmt, lint, test)
+    cmds:
+      - task: fmt
+      - task: lint
+      - task: test
+
+  clean:
+    desc: Clean generated files and build artifacts
+    cmds:
+      - rm -f coverage.out coverage.html
