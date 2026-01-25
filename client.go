@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"net/http"
 	"strconv"
 	"strings"
@@ -186,7 +187,13 @@ func (c *Client) request(ctx context.Context, method, path string, body any, res
 }
 
 func (c *Client) requestWithRetry(ctx context.Context, method, path string, body any, result any, attempt int) error {
-	ctx, cancel := context.WithTimeout(ctx, c.timeout)
+	// Check if context is already cancelled before proceeding
+	if err := ctx.Err(); err != nil {
+		return &NetworkError{Err: err}
+	}
+
+	// Create a request-scoped context with timeout, but respect parent's deadline if shorter
+	reqCtx, cancel := c.contextWithTimeout(ctx, c.timeout)
 	defer cancel()
 
 	url := c.baseURL + path
@@ -200,7 +207,7 @@ func (c *Client) requestWithRetry(ctx context.Context, method, path string, body
 		bodyReader = bytes.NewReader(bodyBytes)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
+	req, err := http.NewRequestWithContext(reqCtx, method, url, bodyReader)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -212,6 +219,10 @@ func (c *Client) requestWithRetry(ctx context.Context, method, path string, body
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		// Check if context was cancelled
+		if ctx.Err() != nil {
+			return &NetworkError{Err: ctx.Err()}
+		}
 		// Retry on network errors
 		if attempt <= c.maxRetries {
 			backoff := c.calculateBackoff(attempt)
@@ -220,12 +231,15 @@ func (c *Client) requestWithRetry(ctx context.Context, method, path string, body
 				"attempt": attempt,
 				"backoff": backoff,
 			})
-			time.Sleep(backoff)
+			// Sleep with context cancellation support
+			if err := c.sleepWithContext(ctx, backoff); err != nil {
+				return &NetworkError{Err: err}
+			}
 			return c.requestWithRetry(ctx, method, path, body, result, attempt+1)
 		}
 		return &NetworkError{Err: err}
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -239,7 +253,10 @@ func (c *Client) requestWithRetry(ctx context.Context, method, path string, body
 			"retry_after": retryAfter,
 			"attempt":     attempt,
 		})
-		time.Sleep(retryAfter)
+		// Sleep with context cancellation support
+		if err := c.sleepWithContext(ctx, retryAfter); err != nil {
+			return &NetworkError{Err: err}
+		}
 		return c.requestWithRetry(ctx, method, path, body, result, attempt+1)
 	}
 
@@ -251,7 +268,10 @@ func (c *Client) requestWithRetry(ctx context.Context, method, path string, body
 			"attempt": attempt,
 			"backoff": backoff,
 		})
-		time.Sleep(backoff)
+		// Sleep with context cancellation support
+		if err := c.sleepWithContext(ctx, backoff); err != nil {
+			return &NetworkError{Err: err}
+		}
 		return c.requestWithRetry(ctx, method, path, body, result, attempt+1)
 	}
 
@@ -270,12 +290,43 @@ func (c *Client) requestWithRetry(ctx context.Context, method, path string, body
 	return nil
 }
 
+// contextWithTimeout creates a context with timeout, respecting the parent's deadline if shorter.
+func (c *Client) contextWithTimeout(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
+	// If parent has a deadline, use the shorter of the two
+	if deadline, ok := parent.Deadline(); ok {
+		parentTimeout := time.Until(deadline)
+		if parentTimeout < timeout {
+			// Parent deadline is sooner, use it (context.WithTimeout would pick the shorter anyway)
+			return context.WithTimeout(parent, parentTimeout)
+		}
+	}
+	return context.WithTimeout(parent, timeout)
+}
+
+// sleepWithContext sleeps for the given duration, but returns early if context is cancelled.
+func (c *Client) sleepWithContext(ctx context.Context, d time.Duration) error {
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
+// calculateBackoff returns exponential backoff duration with jitter.
+// Formula: min(2^(attempt-1) * 1s, 30s) + random jitter (0-25% of backoff)
 func (c *Client) calculateBackoff(attempt int) time.Duration {
+	// Exponential backoff: 2^(attempt-1) seconds
 	backoff := time.Duration(1<<(attempt-1)) * time.Second
+	// Cap at 30 seconds
 	if backoff > 30*time.Second {
 		backoff = 30 * time.Second
 	}
-	return backoff
+	// Add jitter: random value between 0% and 25% of the backoff
+	jitter := time.Duration(rand.Float64() * 0.25 * float64(backoff))
+	return backoff + jitter
 }
 
 func (c *Client) parseRetryAfter(header string) time.Duration {

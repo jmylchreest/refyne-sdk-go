@@ -660,22 +660,25 @@ func TestBackoffCalculation(t *testing.T) {
 	client := NewClient("test-key")
 
 	tests := []struct {
-		attempt  int
-		expected time.Duration
+		attempt int
+		minBase time.Duration // Base backoff without jitter
+		maxBase time.Duration // Base backoff capped at 30s
 	}{
-		{1, 1 * time.Second},
-		{2, 2 * time.Second},
-		{3, 4 * time.Second},
-		{4, 8 * time.Second},
-		{5, 16 * time.Second},
-		{6, 30 * time.Second}, // Max capped at 30s
-		{7, 30 * time.Second},
+		{1, 1 * time.Second, 1 * time.Second},
+		{2, 2 * time.Second, 2 * time.Second},
+		{3, 4 * time.Second, 4 * time.Second},
+		{4, 8 * time.Second, 8 * time.Second},
+		{5, 16 * time.Second, 16 * time.Second},
+		{6, 30 * time.Second, 30 * time.Second}, // Max capped at 30s
+		{7, 30 * time.Second, 30 * time.Second},
 	}
 
 	for _, tt := range tests {
 		got := client.calculateBackoff(tt.attempt)
-		if got != tt.expected {
-			t.Errorf("calculateBackoff(%d) = %v, want %v", tt.attempt, got, tt.expected)
+		// With jitter, result should be between base and base + 25%
+		maxExpected := time.Duration(float64(tt.maxBase) * 1.25)
+		if got < tt.minBase || got > maxExpected {
+			t.Errorf("calculateBackoff(%d) = %v, want between %v and %v", tt.attempt, got, tt.minBase, maxExpected)
 		}
 	}
 }
