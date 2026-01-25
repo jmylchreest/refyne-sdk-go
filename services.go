@@ -72,6 +72,42 @@ func (j *JobsClient) GetResults(ctx context.Context, id string, opts *ResultsOpt
 	return result, nil
 }
 
+// Download gets a presigned download URL for job results.
+func (j *JobsClient) Download(ctx context.Context, id string) (*GetJobResultsDownloadOutputBody, error) {
+	var result GetJobResultsDownloadOutputBody
+	if err := j.client.request(ctx, http.MethodGet, "/api/v1/jobs/"+id+"/download", nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// GetCrawlMap retrieves the crawl map for a job.
+func (j *JobsClient) GetCrawlMap(ctx context.Context, id string) (*GetCrawlMapOutputBody, error) {
+	var result GetCrawlMapOutputBody
+	if err := j.client.request(ctx, http.MethodGet, "/api/v1/jobs/"+id+"/crawl-map", nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// GetDebugCapture retrieves debug capture data for a job.
+func (j *JobsClient) GetDebugCapture(ctx context.Context, id string) (*GetJobDebugCaptureOutputBody, error) {
+	var result GetJobDebugCaptureOutputBody
+	if err := j.client.request(ctx, http.MethodGet, "/api/v1/jobs/"+id+"/debug-capture", nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// GetWebhookDeliveries retrieves webhook deliveries for a job.
+func (j *JobsClient) GetWebhookDeliveries(ctx context.Context, id string) (*GetJobWebhookDeliveriesOutputBody, error) {
+	var result GetJobWebhookDeliveriesOutputBody
+	if err := j.client.request(ctx, http.MethodGet, "/api/v1/jobs/"+id+"/webhooks", nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // SchemasClient handles schema operations.
 type SchemasClient struct {
 	client *Client
@@ -280,4 +316,91 @@ type ChainEntry struct {
 // SetChain sets the LLM fallback chain configuration.
 func (l *LLMClient) SetChain(ctx context.Context, entries []ChainEntry) error {
 	return l.client.request(ctx, http.MethodPut, "/api/v1/llm/chain", map[string]any{"chain": entries}, nil)
+}
+
+// WebhooksClient handles webhook management operations.
+type WebhooksClient struct {
+	client *Client
+}
+
+// List returns all webhooks.
+func (w *WebhooksClient) List(ctx context.Context) (*ListWebhooksOutputBody, error) {
+	var result ListWebhooksOutputBody
+	if err := w.client.request(ctx, http.MethodGet, "/api/v1/webhooks", nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// Get returns a webhook by ID.
+func (w *WebhooksClient) Get(ctx context.Context, id string) (*WebhookResponse, error) {
+	var result WebhookResponse
+	if err := w.client.request(ctx, http.MethodGet, "/api/v1/webhooks/"+id, nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// CreateWebhookInput contains parameters for creating a webhook.
+type CreateWebhookInput struct {
+	Name     string   `json:"name"`
+	URL      string   `json:"url"`
+	Events   []string `json:"events,omitempty"`
+	IsActive bool     `json:"is_active"`
+	Secret   string   `json:"secret,omitempty"`
+}
+
+// Create creates a new webhook.
+func (w *WebhooksClient) Create(ctx context.Context, input CreateWebhookInput) (*WebhookResponse, error) {
+	var result WebhookResponse
+	if err := w.client.request(ctx, http.MethodPost, "/api/v1/webhooks", input, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// Update updates a webhook.
+func (w *WebhooksClient) Update(ctx context.Context, id string, input CreateWebhookInput) (*WebhookResponse, error) {
+	var result WebhookResponse
+	if err := w.client.request(ctx, http.MethodPut, "/api/v1/webhooks/"+id, input, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// Delete deletes a webhook.
+func (w *WebhooksClient) Delete(ctx context.Context, id string) error {
+	return w.client.request(ctx, http.MethodDelete, "/api/v1/webhooks/"+id, nil, nil)
+}
+
+// ListDeliveriesOptions contains options for listing webhook deliveries.
+type ListDeliveriesOptions struct {
+	Limit  int
+	Offset int
+}
+
+// ListDeliveries returns webhook deliveries with optional pagination.
+func (w *WebhooksClient) ListDeliveries(ctx context.Context, id string, opts *ListDeliveriesOptions) (*ListWebhookDeliveriesOutputBody, error) {
+	path := "/api/v1/webhooks/" + id + "/deliveries"
+	if opts != nil {
+		params := ""
+		if opts.Limit > 0 {
+			params += fmt.Sprintf("limit=%d", opts.Limit)
+		}
+		if opts.Offset > 0 {
+			if params != "" {
+				params += "&"
+			}
+			params += fmt.Sprintf("offset=%d", opts.Offset)
+		}
+		if params != "" {
+			path += "?" + params
+		}
+	}
+
+	var result ListWebhookDeliveriesOutputBody
+	if err := w.client.request(ctx, http.MethodGet, path, nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
 }

@@ -48,11 +48,12 @@ type Client struct {
 	logger Logger
 
 	// Sub-clients for organized API access
-	Jobs    *JobsClient
-	Schemas *SchemasClient
-	Sites   *SitesClient
-	Keys    *KeysClient
-	LLM     *LLMClient
+	Jobs     *JobsClient
+	Schemas  *SchemasClient
+	Sites    *SitesClient
+	Keys     *KeysClient
+	LLM      *LLMClient
+	Webhooks *WebhooksClient
 }
 
 // ClientOption configures the client.
@@ -114,6 +115,7 @@ func NewClient(apiKey string, opts ...ClientOption) *Client {
 	c.Sites = &SitesClient{client: c}
 	c.Keys = &KeysClient{client: c}
 	c.LLM = &LLMClient{client: c}
+	c.Webhooks = &WebhooksClient{client: c}
 
 	return c
 }
@@ -175,6 +177,36 @@ func (c *Client) Analyze(ctx context.Context, input AnalyzeInput) (*AnalyzeRespo
 func (c *Client) GetUsage(ctx context.Context) (*GetUsageOutputBody, error) {
 	var result GetUsageOutputBody
 	err := c.request(ctx, http.MethodGet, "/api/v1/usage", nil, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// Health checks the API health status.
+func (c *Client) Health(ctx context.Context) (*HealthCheckOutputBody, error) {
+	var result HealthCheckOutputBody
+	err := c.request(ctx, http.MethodGet, "/api/v1/health", nil, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// ListCleaners returns available content cleaners.
+func (c *Client) ListCleaners(ctx context.Context) (*ListCleanersOutputBody, error) {
+	var result ListCleanersOutputBody
+	err := c.request(ctx, http.MethodGet, "/api/v1/cleaners", nil, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// GetPricingTiers returns the available pricing tiers and their limits.
+func (c *Client) GetPricingTiers(ctx context.Context) (*ListTierLimitsOutputBody, error) {
+	var result ListTierLimitsOutputBody
+	err := c.request(ctx, http.MethodGet, "/api/v1/pricing/tiers", nil, &result)
 	if err != nil {
 		return nil, err
 	}
