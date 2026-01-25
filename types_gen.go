@@ -278,7 +278,7 @@ type CleanerChainItemResponse struct {
 
 // CleanerConfigInput defines model for CleanerConfigInput.
 type CleanerConfigInput struct {
-	// Name Cleaner name (noop, markdown, trafilatura, readability)
+	// Name Cleaner name (noop, refyne)
 	Name    string               `json:"name"`
 	Options *CleanerOptionsInput `json:"options,omitempty"`
 }
@@ -300,47 +300,38 @@ type CleanerOptionResponse struct {
 
 // CleanerOptionsInput defines model for CleanerOptionsInput.
 type CleanerOptionsInput struct {
-	// BaseUrl Base URL for resolving relative links (readability, refyne)
+	// BaseUrl Base URL for resolving relative links
 	BaseUrl *string `json:"base_url,omitempty"`
 
-	// ExtractHeadings Extract heading structure to frontmatter (refyne markdown)
+	// ExtractHeadings Extract heading structure to frontmatter (markdown)
 	ExtractHeadings *bool `json:"extract_headings,omitempty"`
 
-	// ExtractImages Extract images to frontmatter with {{IMG_001}} placeholders (refyne markdown)
+	// ExtractImages Extract images to frontmatter with {{IMG_001}} placeholders (markdown)
 	ExtractImages *bool `json:"extract_images,omitempty"`
 
-	// Images Include images in output (trafilatura)
-	Images *bool `json:"images,omitempty"`
-
-	// IncludeFrontmatter Prepend YAML frontmatter with metadata (refyne markdown output)
+	// IncludeFrontmatter Prepend YAML frontmatter with metadata (markdown output)
 	IncludeFrontmatter *bool `json:"include_frontmatter,omitempty"`
 
-	// KeepSelectors CSS selectors for elements to always keep (refyne)
+	// KeepSelectors CSS selectors for elements to always keep
 	KeepSelectors *[]string `json:"keep_selectors"`
 
-	// Links Include links in output (trafilatura)
-	Links *bool `json:"links,omitempty"`
-
-	// Output Output format (trafilatura, readability, refyne)
+	// Output Output format: html, text, or markdown
 	Output *CleanerOptionsInputOutput `json:"output,omitempty"`
 
-	// Preset Refyne preset: default, minimal, or aggressive
+	// Preset Preset: default, minimal, or aggressive
 	Preset *CleanerOptionsInputPreset `json:"preset,omitempty"`
 
-	// RemoveSelectors CSS selectors for elements to remove (refyne)
+	// RemoveSelectors CSS selectors for elements to remove
 	RemoveSelectors *[]string `json:"remove_selectors"`
 
-	// ResolveUrls Resolve relative URLs to absolute using base_url (refyne)
+	// ResolveUrls Resolve relative URLs to absolute using base_url
 	ResolveUrls *bool `json:"resolve_urls,omitempty"`
-
-	// Tables Include tables in output (trafilatura)
-	Tables *bool `json:"tables,omitempty"`
 }
 
-// CleanerOptionsInputOutput Output format (trafilatura, readability, refyne)
+// CleanerOptionsInputOutput Output format: html, text, or markdown
 type CleanerOptionsInputOutput string
 
-// CleanerOptionsInputPreset Refyne preset: default, minimal, or aggressive
+// CleanerOptionsInputPreset Preset: default, minimal, or aggressive
 type CleanerOptionsInputPreset string
 
 // CleanerResponse defines model for CleanerResponse.
@@ -1048,55 +1039,64 @@ type InlineWebhookInput struct {
 
 // JobCleanerConfigInput defines model for JobCleanerConfigInput.
 type JobCleanerConfigInput struct {
-	// Name Cleaner name (noop, markdown, trafilatura, readability)
+	// Name Cleaner name (noop, refyne)
 	Name    string                  `json:"name"`
 	Options *JobCleanerOptionsInput `json:"options,omitempty"`
 }
 
 // JobCleanerOptionsInput defines model for JobCleanerOptionsInput.
 type JobCleanerOptionsInput struct {
-	// BaseUrl Base URL for resolving relative links (readability, refyne)
+	// BaseUrl Base URL for resolving relative links
 	BaseUrl *string `json:"base_url,omitempty"`
 
-	// ExtractHeadings Extract heading structure to frontmatter (refyne markdown)
+	// ExtractHeadings Extract heading structure to frontmatter (markdown)
 	ExtractHeadings *bool `json:"extract_headings,omitempty"`
 
-	// ExtractImages Extract images to frontmatter with {{IMG_001}} placeholders (refyne markdown)
+	// ExtractImages Extract images to frontmatter with {{IMG_001}} placeholders (markdown)
 	ExtractImages *bool `json:"extract_images,omitempty"`
 
-	// Images Include images in output (trafilatura)
-	Images *bool `json:"images,omitempty"`
-
-	// IncludeFrontmatter Prepend YAML frontmatter with metadata (refyne markdown output)
+	// IncludeFrontmatter Prepend YAML frontmatter with metadata (markdown output)
 	IncludeFrontmatter *bool `json:"include_frontmatter,omitempty"`
 
-	// KeepSelectors CSS selectors for elements to always keep (refyne)
+	// KeepSelectors CSS selectors for elements to always keep
 	KeepSelectors *[]string `json:"keep_selectors"`
 
-	// Links Include links in output (trafilatura)
-	Links *bool `json:"links,omitempty"`
-
-	// Output Output format (trafilatura, readability, refyne)
+	// Output Output format: html, text, or markdown
 	Output *JobCleanerOptionsInputOutput `json:"output,omitempty"`
 
-	// Preset Refyne preset: default, minimal, or aggressive
+	// Preset Preset: default, minimal, or aggressive
 	Preset *JobCleanerOptionsInputPreset `json:"preset,omitempty"`
 
-	// RemoveSelectors CSS selectors for elements to remove (refyne)
+	// RemoveSelectors CSS selectors for elements to remove
 	RemoveSelectors *[]string `json:"remove_selectors"`
 
-	// ResolveUrls Resolve relative URLs to absolute using base_url (refyne)
+	// ResolveUrls Resolve relative URLs to absolute using base_url
 	ResolveUrls *bool `json:"resolve_urls,omitempty"`
-
-	// Tables Include tables in output (trafilatura)
-	Tables *bool `json:"tables,omitempty"`
 }
 
-// JobCleanerOptionsInputOutput Output format (trafilatura, readability, refyne)
+// JobCleanerOptionsInputOutput Output format: html, text, or markdown
 type JobCleanerOptionsInputOutput string
 
-// JobCleanerOptionsInputPreset Refyne preset: default, minimal, or aggressive
+// JobCleanerOptionsInputPreset Preset: default, minimal, or aggressive
 type JobCleanerOptionsInputPreset string
+
+// JobQueueStats defines model for JobQueueStats.
+type JobQueueStats struct {
+	// PendingByTier Pending jobs by tier
+	PendingByTier map[string]int64 `json:"pending_by_tier"`
+
+	// PendingTotal Total pending jobs
+	PendingTotal int64 `json:"pending_total"`
+
+	// RunningByTier Running jobs by tier
+	RunningByTier map[string]int64 `json:"running_by_tier"`
+
+	// RunningByUser Running jobs by user ID
+	RunningByUser map[string]int64 `json:"running_by_user"`
+
+	// RunningTotal Total running jobs
+	RunningTotal int64 `json:"running_total"`
+}
 
 // JobResponse defines model for JobResponse.
 type JobResponse struct {
@@ -1356,6 +1356,15 @@ type ProviderModelResponse struct {
 	Name        string  `json:"name"`
 }
 
+// RateLimitStats defines model for RateLimitStats.
+type RateLimitStats struct {
+	// ActiveSuspensions Number of currently suspended API keys
+	ActiveSuspensions int64 `json:"active_suspensions"`
+
+	// TotalEntries Total rate limit entries in database
+	TotalEntries int64 `json:"total_entries"`
+}
+
 // ReadyzOutputBody defines model for ReadyzOutputBody.
 type ReadyzOutputBody struct {
 	// Status Readiness status
@@ -1580,6 +1589,12 @@ type SubscriptionTierResponse struct {
 type SyncTiersOutputBody struct {
 	// Message Sync result message
 	Message string `json:"message"`
+}
+
+// SystemMetrics defines model for SystemMetrics.
+type SystemMetrics struct {
+	JobQueue   JobQueueStats  `json:"job_queue"`
+	RateLimits RateLimitStats `json:"rate_limits"`
 }
 
 // TierLimitsResponse defines model for TierLimitsResponse.
