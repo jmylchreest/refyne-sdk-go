@@ -28,6 +28,13 @@ const (
 	CleanerOptionsInputPresetMinimal    CleanerOptionsInputPreset = "minimal"
 )
 
+// Defines values for CrawlOptionsFetchMode.
+const (
+	CrawlOptionsFetchModeAuto    CrawlOptionsFetchMode = "auto"
+	CrawlOptionsFetchModeDynamic CrawlOptionsFetchMode = "dynamic"
+	CrawlOptionsFetchModeStatic  CrawlOptionsFetchMode = "static"
+)
+
 // Defines values for CreateSavedSiteInputBodyFetchMode.
 const (
 	CreateSavedSiteInputBodyFetchModeAuto    CreateSavedSiteInputBodyFetchMode = "auto"
@@ -88,9 +95,9 @@ const (
 
 // Defines values for UpdateSavedSiteInputBodyFetchMode.
 const (
-	UpdateSavedSiteInputBodyFetchModeAuto    UpdateSavedSiteInputBodyFetchMode = "auto"
-	UpdateSavedSiteInputBodyFetchModeDynamic UpdateSavedSiteInputBodyFetchMode = "dynamic"
-	UpdateSavedSiteInputBodyFetchModeStatic  UpdateSavedSiteInputBodyFetchMode = "static"
+	Auto    UpdateSavedSiteInputBodyFetchMode = "auto"
+	Dynamic UpdateSavedSiteInputBodyFetchMode = "dynamic"
+	Static  UpdateSavedSiteInputBodyFetchMode = "static"
 )
 
 // Defines values for UpdateSchemaInputBodyVisibility.
@@ -451,6 +458,9 @@ type CrawlOptions struct {
 	// ExtractFromSeeds Extract data from the seed URL (not just discovered pages)
 	ExtractFromSeeds *bool `json:"extract_from_seeds,omitempty"`
 
+	// FetchMode Page fetching mode: auto (detect and retry with browser if needed), static (fast, Colly-based), dynamic (browser rendering for JS-heavy sites, requires content_dynamic feature)
+	FetchMode *CrawlOptionsFetchMode `json:"fetch_mode,omitempty"`
+
 	// FollowPattern Regex pattern to filter URLs. Only matching URLs are crawled.
 	FollowPattern *string `json:"follow_pattern,omitempty"`
 
@@ -475,6 +485,9 @@ type CrawlOptions struct {
 	// UseSitemap Discover URLs from sitemap.xml instead of CSS selectors
 	UseSitemap *bool `json:"use_sitemap,omitempty"`
 }
+
+// CrawlOptionsFetchMode Page fetching mode: auto (detect and retry with browser if needed), static (fast, Colly-based), dynamic (browser rendering for JS-heavy sites, requires content_dynamic feature)
+type CrawlOptionsFetchMode string
 
 // CrawlOptionsInput defines model for CrawlOptionsInput.
 type CrawlOptionsInput struct {
@@ -1525,11 +1538,8 @@ type SchemaOutput struct {
 
 // ServiceKeyInput defines model for ServiceKeyInput.
 type ServiceKeyInput struct {
-	// ApiKey API key for the provider
-	ApiKey string `json:"api_key"`
-
-	// DefaultModel Default model to use
-	DefaultModel string `json:"default_model"`
+	// ApiKey API key for the provider (required for new keys, optional for updates)
+	ApiKey *string `json:"api_key,omitempty"`
 
 	// IsEnabled Whether this provider is enabled
 	IsEnabled bool `json:"is_enabled"`
@@ -1543,12 +1553,11 @@ type ServiceKeyInputProvider string
 
 // ServiceKeyResponse defines model for ServiceKeyResponse.
 type ServiceKeyResponse struct {
-	CreatedAt    string `json:"created_at"`
-	DefaultModel string `json:"default_model"`
-	HasKey       bool   `json:"has_key"`
-	IsEnabled    bool   `json:"is_enabled"`
-	Provider     string `json:"provider"`
-	UpdatedAt    string `json:"updated_at"`
+	CreatedAt string `json:"created_at"`
+	HasKey    bool   `json:"has_key"`
+	IsEnabled bool   `json:"is_enabled"`
+	Provider  string `json:"provider"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 // SetFallbackChainInputBody defines model for SetFallbackChainInputBody.
