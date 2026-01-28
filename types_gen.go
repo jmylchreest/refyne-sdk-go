@@ -180,8 +180,8 @@ type AnalysisResultInput struct {
 	// SiteSummary Brief site description
 	SiteSummary *string `json:"site_summary,omitempty"`
 
-	// SuggestedSchema Suggested YAML schema
-	SuggestedSchema *string `json:"suggested_schema,omitempty"`
+	// SuggestedSchema Schema (JSON object or YAML string)
+	SuggestedSchema interface{} `json:"suggested_schema,omitempty"`
 }
 
 // AnalysisResultOutput defines model for AnalysisResultOutput.
@@ -204,8 +204,8 @@ type AnalysisResultOutput struct {
 	// SiteSummary Brief site description
 	SiteSummary string `json:"site_summary"`
 
-	// SuggestedSchema Suggested YAML schema
-	SuggestedSchema string `json:"suggested_schema"`
+	// SuggestedSchema Schema suggestion (JSON object)
+	SuggestedSchema interface{} `json:"suggested_schema"`
 }
 
 // AnalyticsJobResponse defines model for AnalyticsJobResponse.
@@ -273,8 +273,8 @@ type AnalyzeResponseBody struct {
 	// SiteSummary Brief description of what the site/page is about
 	SiteSummary string `json:"site_summary"`
 
-	// SuggestedSchema YAML schema suggestion for extraction
-	SuggestedSchema string `json:"suggested_schema"`
+	// SuggestedSchema Schema suggestion for extraction (JSON object)
+	SuggestedSchema interface{} `json:"suggested_schema"`
 }
 
 // CleanerChainItemResponse defines model for CleanerChainItemResponse.
