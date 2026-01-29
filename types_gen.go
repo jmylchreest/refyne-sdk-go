@@ -648,10 +648,16 @@ type DebugCaptureEntry struct {
 	// Id Capture ID
 	Id string `json:"id"`
 
+	// IsByok Whether user's own API key was used
+	IsByok *bool `json:"is_byok,omitempty"`
+
 	// JobType Job type (analyze, extract, crawl)
 	JobType  string                  `json:"job_type"`
 	Request  DebugCaptureLLMRequest  `json:"request"`
 	Response DebugCaptureLLMResponse `json:"response"`
+
+	// Sequence Order within job (0-indexed)
+	Sequence *int64 `json:"sequence,omitempty"`
 
 	// Timestamp When the request was made
 	Timestamp string `json:"timestamp"`
@@ -665,11 +671,23 @@ type DebugCaptureLLMRequest struct {
 	// ContentSize Size of content sent to LLM
 	ContentSize int64 `json:"content_size"`
 
+	// FallbackPosition Position in fallback chain (0=primary)
+	FallbackPosition *int64 `json:"fallback_position,omitempty"`
+
 	// FetchMode Content fetch mode
 	FetchMode *string `json:"fetch_mode,omitempty"`
 
 	// HintsApplied Preprocessing hints applied
 	HintsApplied *map[string]string `json:"hints_applied,omitempty"`
+
+	// IsRetry Whether this was a retry attempt
+	IsRetry *bool `json:"is_retry,omitempty"`
+
+	// JsonMode Whether JSON mode was enabled
+	JsonMode *bool `json:"json_mode,omitempty"`
+
+	// MaxTokens Max tokens requested
+	MaxTokens *int64 `json:"max_tokens,omitempty"`
 
 	// Model LLM model used
 	Model string `json:"model"`
@@ -688,21 +706,42 @@ type DebugCaptureLLMRequest struct {
 
 	// Schema Schema used for extraction
 	Schema *string `json:"schema,omitempty"`
+
+	// SystemPrompt System instructions sent to LLM
+	SystemPrompt *string `json:"system_prompt,omitempty"`
+
+	// Temperature Temperature setting
+	Temperature *float64 `json:"temperature,omitempty"`
+
+	// UserPrompt Formatted user content/prompt
+	UserPrompt *string `json:"user_prompt,omitempty"`
 }
 
 // DebugCaptureLLMResponse defines model for DebugCaptureLLMResponse.
 type DebugCaptureLLMResponse struct {
+	// CostUsd Cost of this request in USD
+	CostUsd *float64 `json:"cost_usd,omitempty"`
+
 	// DurationMs Request duration in milliseconds
 	DurationMs int64 `json:"duration_ms"`
 
 	// Error Error message if failed
 	Error *string `json:"error,omitempty"`
 
+	// ErrorCategory Error classification
+	ErrorCategory *string `json:"error_category,omitempty"`
+
 	// InputTokens Input tokens consumed
 	InputTokens int64 `json:"input_tokens"`
 
 	// OutputTokens Output tokens generated
 	OutputTokens int64 `json:"output_tokens"`
+
+	// ParseError Error if JSON parsing failed
+	ParseError *string `json:"parse_error,omitempty"`
+
+	// ParsedOutput Structured data (if successfully parsed)
+	ParsedOutput interface{} `json:"parsed_output,omitempty"`
 
 	// RawOutput Raw LLM response text
 	RawOutput *string `json:"raw_output,omitempty"`
@@ -767,6 +806,21 @@ type DetectedElementOutput struct {
 
 	// Type Data type: string, number, boolean, array, url, date
 	Type string `json:"type"`
+}
+
+// DownloadJobDebugCaptureOutputBody defines model for DownloadJobDebugCaptureOutputBody.
+type DownloadJobDebugCaptureOutputBody struct {
+	// DownloadUrl Signed URL for downloading the debug capture file
+	DownloadUrl string `json:"download_url"`
+
+	// ExpiresAt When the download URL expires
+	ExpiresAt string `json:"expires_at"`
+
+	// Filename Suggested filename for the download
+	Filename string `json:"filename"`
+
+	// JobId Job ID
+	JobId string `json:"job_id"`
 }
 
 // ErrorCategoryResponse defines model for ErrorCategoryResponse.
@@ -988,14 +1042,38 @@ type GetFallbackChainOutputBody struct {
 
 // GetJobDebugCaptureOutputBody defines model for GetJobDebugCaptureOutputBody.
 type GetJobDebugCaptureOutputBody struct {
+	// ApiVersion API version that processed this job
+	ApiVersion *string `json:"api_version,omitempty"`
+
 	// Captures Captured LLM requests
 	Captures *[]DebugCaptureEntry `json:"captures"`
 
 	// Enabled Whether debug capture was enabled for this job
 	Enabled bool `json:"enabled"`
 
+	// IsByok Whether user's own API key was used
+	IsByok *bool `json:"is_byok,omitempty"`
+
 	// JobId Job ID
 	JobId string `json:"job_id"`
+
+	// JobType Job type (analyze, extract, crawl)
+	JobType *string `json:"job_type,omitempty"`
+
+	// TotalCostUsd Total cost in USD
+	TotalCostUsd *float64 `json:"total_cost_usd,omitempty"`
+
+	// TotalDurationMs Total duration in milliseconds
+	TotalDurationMs *int64 `json:"total_duration_ms,omitempty"`
+
+	// TotalRequests Number of LLM requests
+	TotalRequests *int64 `json:"total_requests,omitempty"`
+
+	// TotalTokensIn Total input tokens
+	TotalTokensIn *int64 `json:"total_tokens_in,omitempty"`
+
+	// TotalTokensOut Total output tokens
+	TotalTokensOut *int64 `json:"total_tokens_out,omitempty"`
 }
 
 // GetJobResultsDownloadOutputBody defines model for GetJobResultsDownloadOutputBody.
