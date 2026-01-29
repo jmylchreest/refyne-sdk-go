@@ -642,6 +642,9 @@ type CreateSchemaInputBodyVisibility string
 
 // DebugCaptureEntry defines model for DebugCaptureEntry.
 type DebugCaptureEntry struct {
+	// ApiVersion API version that processed this request
+	ApiVersion *string `json:"api_version,omitempty"`
+
 	// Id Capture ID
 	Id string `json:"id"`
 
