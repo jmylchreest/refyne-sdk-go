@@ -639,25 +639,13 @@ type CreateSchemaInputBodyVisibility string
 
 // DebugCaptureEntry defines model for DebugCaptureEntry.
 type DebugCaptureEntry struct {
-	// HintsApplied Preprocessing hints applied
-	HintsApplied *map[string]string `json:"hints_applied,omitempty"`
-
 	// Id Capture ID
 	Id string `json:"id"`
 
 	// JobType Job type (analyze, extract, crawl)
-	JobType string `json:"job_type"`
-
-	// Prompt Full prompt sent to LLM (for analyze jobs)
-	Prompt *string `json:"prompt,omitempty"`
-
-	// RawContent Page content (for extract/crawl jobs)
-	RawContent *string                 `json:"raw_content,omitempty"`
-	Request    DebugCaptureLLMRequest  `json:"request"`
-	Response   DebugCaptureLLMResponse `json:"response"`
-
-	// Schema Schema used for extraction
-	Schema *string `json:"schema,omitempty"`
+	JobType  string                  `json:"job_type"`
+	Request  DebugCaptureLLMRequest  `json:"request"`
+	Response DebugCaptureLLMResponse `json:"response"`
 
 	// Timestamp When the request was made
 	Timestamp string `json:"timestamp"`
@@ -674,14 +662,26 @@ type DebugCaptureLLMRequest struct {
 	// FetchMode Content fetch mode
 	FetchMode *string `json:"fetch_mode,omitempty"`
 
+	// HintsApplied Preprocessing hints applied
+	HintsApplied *map[string]string `json:"hints_applied,omitempty"`
+
 	// Model LLM model used
 	Model string `json:"model"`
+
+	// PageContent Cleaned page content sent to LLM
+	PageContent *string `json:"page_content,omitempty"`
+
+	// Prompt Full prompt sent to LLM (for analyze jobs)
+	Prompt *string `json:"prompt,omitempty"`
 
 	// PromptSize Total prompt size including system instructions
 	PromptSize int64 `json:"prompt_size"`
 
 	// Provider LLM provider used
 	Provider string `json:"provider"`
+
+	// Schema Schema used for extraction
+	Schema *string `json:"schema,omitempty"`
 }
 
 // DebugCaptureLLMResponse defines model for DebugCaptureLLMResponse.
@@ -697,6 +697,9 @@ type DebugCaptureLLMResponse struct {
 
 	// OutputTokens Output tokens generated
 	OutputTokens int64 `json:"output_tokens"`
+
+	// RawOutput Raw LLM response text
+	RawOutput *string `json:"raw_output,omitempty"`
 
 	// Success Whether the request succeeded
 	Success bool `json:"success"`
