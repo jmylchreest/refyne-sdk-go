@@ -231,8 +231,8 @@ type AnalyticsJobResponse struct {
 
 // AnalyzeInputBody defines model for AnalyzeInputBody.
 type AnalyzeInputBody struct {
-	// Debug Capture debug information (LLM prompts/responses). Defaults to true for analyze jobs.
-	Debug *bool `json:"debug,omitempty"`
+	// CaptureDebug Enable debug capture to store raw LLM request/response for troubleshooting. Defaults to true for analyze jobs.
+	CaptureDebug *bool `json:"capture_debug,omitempty"`
 
 	// Depth Crawl depth: 0=single page, 1=one level deep
 	Depth *int64 `json:"depth,omitempty"`
@@ -530,6 +530,9 @@ type CrawlWebhookHeaderInput struct {
 
 // CreateCrawlJobInputBody defines model for CreateCrawlJobInputBody.
 type CreateCrawlJobInputBody struct {
+	// CaptureDebug Enable debug capture to store raw LLM request/response for troubleshooting
+	CaptureDebug *bool `json:"capture_debug,omitempty"`
+
 	// CleanerChain Content cleaner chain (default: [markdown])
 	CleanerChain *[]JobCleanerConfigInput `json:"cleaner_chain"`
 	LlmConfig    *LLMConfigInput          `json:"llm_config,omitempty"`
@@ -818,6 +821,9 @@ type ErrorSummary struct {
 
 // ExtractInputBody defines model for ExtractInputBody.
 type ExtractInputBody struct {
+	// CaptureDebug Enable debug capture to store raw LLM request/response for troubleshooting
+	CaptureDebug *bool `json:"capture_debug,omitempty"`
+
 	// CleanerChain Content cleaner chain (default: [markdown])
 	CleanerChain *[]CleanerConfigInput `json:"cleaner_chain"`
 
