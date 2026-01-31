@@ -55,14 +55,6 @@ const (
 	ExtractInputBodyFetchModeStatic  ExtractInputBodyFetchMode = "static"
 )
 
-// Defines values for FallbackChainEntryInputProvider.
-const (
-	FallbackChainEntryInputProviderAnthropic  FallbackChainEntryInputProvider = "anthropic"
-	FallbackChainEntryInputProviderOllama     FallbackChainEntryInputProvider = "ollama"
-	FallbackChainEntryInputProviderOpenai     FallbackChainEntryInputProvider = "openai"
-	FallbackChainEntryInputProviderOpenrouter FallbackChainEntryInputProvider = "openrouter"
-)
-
 // Defines values for JobCleanerOptionsInputOutput.
 const (
 	JobCleanerOptionsInputOutputHtml     JobCleanerOptionsInputOutput = "html"
@@ -79,19 +71,12 @@ const (
 
 // Defines values for LLMConfigInputProvider.
 const (
-	LLMConfigInputProviderAnthropic  LLMConfigInputProvider = "anthropic"
-	LLMConfigInputProviderCredits    LLMConfigInputProvider = "credits"
-	LLMConfigInputProviderHelicone   LLMConfigInputProvider = "helicone"
-	LLMConfigInputProviderOllama     LLMConfigInputProvider = "ollama"
-	LLMConfigInputProviderOpenai     LLMConfigInputProvider = "openai"
-	LLMConfigInputProviderOpenrouter LLMConfigInputProvider = "openrouter"
-)
-
-// Defines values for ServiceKeyInputProvider.
-const (
-	ServiceKeyInputProviderAnthropic  ServiceKeyInputProvider = "anthropic"
-	ServiceKeyInputProviderOpenai     ServiceKeyInputProvider = "openai"
-	ServiceKeyInputProviderOpenrouter ServiceKeyInputProvider = "openrouter"
+	Anthropic  LLMConfigInputProvider = "anthropic"
+	Credits    LLMConfigInputProvider = "credits"
+	Helicone   LLMConfigInputProvider = "helicone"
+	Ollama     LLMConfigInputProvider = "ollama"
+	Openai     LLMConfigInputProvider = "openai"
+	Openrouter LLMConfigInputProvider = "openrouter"
 )
 
 // Defines values for UpdateSavedSiteInputBodyFetchMode.
@@ -105,22 +90,6 @@ const (
 const (
 	UpdateSchemaInputBodyVisibilityPrivate UpdateSchemaInputBodyVisibility = "private"
 	UpdateSchemaInputBodyVisibilityPublic  UpdateSchemaInputBodyVisibility = "public"
-)
-
-// Defines values for UserFallbackChainEntryInputProvider.
-const (
-	UserFallbackChainEntryInputProviderAnthropic  UserFallbackChainEntryInputProvider = "anthropic"
-	UserFallbackChainEntryInputProviderOllama     UserFallbackChainEntryInputProvider = "ollama"
-	UserFallbackChainEntryInputProviderOpenai     UserFallbackChainEntryInputProvider = "openai"
-	UserFallbackChainEntryInputProviderOpenrouter UserFallbackChainEntryInputProvider = "openrouter"
-)
-
-// Defines values for UserServiceKeyInputProvider.
-const (
-	Anthropic  UserServiceKeyInputProvider = "anthropic"
-	Ollama     UserServiceKeyInputProvider = "ollama"
-	Openai     UserServiceKeyInputProvider = "openai"
-	Openrouter UserServiceKeyInputProvider = "openrouter"
 )
 
 // Defines values for GetJobResultsRawParamsFormat.
@@ -943,15 +912,12 @@ type FallbackChainEntryInput struct {
 	// Model Model identifier
 	Model string `json:"model"`
 
-	// Provider LLM provider name
-	Provider FallbackChainEntryInputProvider `json:"provider"`
+	// Provider LLM provider name (see /llm/providers for available options)
+	Provider string `json:"provider"`
 
 	// Temperature Temperature setting (0.0-1.0, nil for default)
 	Temperature *float64 `json:"temperature,omitempty"`
 }
-
-// FallbackChainEntryInputProvider LLM provider name
-type FallbackChainEntryInputProvider string
 
 // FallbackChainEntryResponse defines model for FallbackChainEntryResponse.
 type FallbackChainEntryResponse struct {
@@ -1645,12 +1611,9 @@ type ServiceKeyInput struct {
 	// IsEnabled Whether this provider is enabled
 	IsEnabled bool `json:"is_enabled"`
 
-	// Provider LLM provider name
-	Provider ServiceKeyInputProvider `json:"provider"`
+	// Provider LLM provider name (see /llm/providers for available options)
+	Provider string `json:"provider"`
 }
-
-// ServiceKeyInputProvider LLM provider name
-type ServiceKeyInputProvider string
 
 // ServiceKeyResponse defines model for ServiceKeyResponse.
 type ServiceKeyResponse struct {
@@ -1840,15 +1803,12 @@ type UserFallbackChainEntryInput struct {
 	// Model Model identifier
 	Model string `json:"model"`
 
-	// Provider LLM provider name
-	Provider UserFallbackChainEntryInputProvider `json:"provider"`
+	// Provider LLM provider name (see /llm/providers for available options)
+	Provider string `json:"provider"`
 
 	// Temperature Temperature setting (0.0-1.0, nil for default)
 	Temperature *float64 `json:"temperature,omitempty"`
 }
-
-// UserFallbackChainEntryInputProvider LLM provider name
-type UserFallbackChainEntryInputProvider string
 
 // UserFallbackChainEntryResponse defines model for UserFallbackChainEntryResponse.
 type UserFallbackChainEntryResponse struct {
@@ -1888,12 +1848,9 @@ type UserServiceKeyInput struct {
 	// IsEnabled Whether this provider is enabled
 	IsEnabled bool `json:"is_enabled"`
 
-	// Provider LLM provider name
-	Provider UserServiceKeyInputProvider `json:"provider"`
+	// Provider LLM provider name (see /llm/providers for available options)
+	Provider string `json:"provider"`
 }
-
-// UserServiceKeyInputProvider LLM provider name
-type UserServiceKeyInputProvider string
 
 // UserServiceKeyResponse defines model for UserServiceKeyResponse.
 type UserServiceKeyResponse struct {
