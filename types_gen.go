@@ -358,6 +358,9 @@ type CrawlJobResponseBody struct {
 	// PageCount Number of pages successfully extracted (sync mode)
 	PageCount *int64 `json:"page_count,omitempty"`
 
+	// QueuePosition Position in queue (1-indexed, only for pending jobs)
+	QueuePosition *int64 `json:"queue_position,omitempty"`
+
 	// Status Job status: pending, running, completed, failed
 	Status string `json:"status"`
 
@@ -1178,6 +1181,7 @@ type JobResponse struct {
 	ErrorMessage     *string `json:"error_message,omitempty"`
 	Id               string  `json:"id"`
 	PageCount        int64   `json:"page_count"`
+	QueuePosition    int64   `json:"queue_position"`
 	StartedAt        *string `json:"started_at,omitempty"`
 	Status           string  `json:"status"`
 	TokenUsageInput  int64   `json:"token_usage_input"`
