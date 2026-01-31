@@ -81,6 +81,7 @@ const (
 const (
 	LLMConfigInputProviderAnthropic  LLMConfigInputProvider = "anthropic"
 	LLMConfigInputProviderCredits    LLMConfigInputProvider = "credits"
+	LLMConfigInputProviderHelicone   LLMConfigInputProvider = "helicone"
 	LLMConfigInputProviderOllama     LLMConfigInputProvider = "ollama"
 	LLMConfigInputProviderOpenai     LLMConfigInputProvider = "openai"
 	LLMConfigInputProviderOpenrouter LLMConfigInputProvider = "openrouter"
@@ -1264,7 +1265,7 @@ type LLMConfigInput struct {
 	// ApiKey API key for the provider
 	ApiKey *string `json:"api_key,omitempty"`
 
-	// BaseUrl Custom base URL (for Ollama)
+	// BaseUrl Custom base URL (for Ollama or self-hosted Helicone)
 	BaseUrl *string `json:"base_url,omitempty"`
 
 	// Model Model to use
@@ -1272,6 +1273,12 @@ type LLMConfigInput struct {
 
 	// Provider LLM provider
 	Provider *LLMConfigInputProvider `json:"provider,omitempty"`
+
+	// TargetApiKey Underlying provider's API key for Helicone self-hosted mode
+	TargetApiKey *string `json:"target_api_key,omitempty"`
+
+	// TargetProvider Underlying provider for Helicone self-hosted mode
+	TargetProvider *string `json:"target_provider,omitempty"`
 }
 
 // LLMConfigInputProvider LLM provider
@@ -1440,14 +1447,18 @@ type ProviderErrorResponse struct {
 
 // ProviderInfo defines model for ProviderInfo.
 type ProviderInfo struct {
-	BaseUrlHint      *string   `json:"base_url_hint,omitempty"`
-	Description      string    `json:"description"`
-	DisplayName      string    `json:"display_name"`
-	DocsUrl          *string   `json:"docs_url,omitempty"`
-	KeyPlaceholder   *string   `json:"key_placeholder,omitempty"`
-	Name             string    `json:"name"`
-	RequiredFeatures *[]string `json:"required_features"`
-	RequiresKey      bool      `json:"requires_key"`
+	AllowBaseUrlOverride bool      `json:"allow_base_url_override"`
+	BaseUrlHint          *string   `json:"base_url_hint,omitempty"`
+	DecommissionNote     *string   `json:"decommission_note,omitempty"`
+	Description          string    `json:"description"`
+	DisplayName          string    `json:"display_name"`
+	DocsUrl              *string   `json:"docs_url,omitempty"`
+	KeyPlaceholder       *string   `json:"key_placeholder,omitempty"`
+	Name                 string    `json:"name"`
+	RequiredFeatures     *[]string `json:"required_features"`
+	RequiresKey          bool      `json:"requires_key"`
+	Status               string    `json:"status"`
+	SuccessorProvider    *string   `json:"successor_provider,omitempty"`
 }
 
 // ProviderModelResponse defines model for ProviderModelResponse.
@@ -2062,6 +2073,12 @@ type GetJobResultsRawParams struct {
 
 // GetJobResultsRawParamsFormat defines parameters for GetJobResultsRaw.
 type GetJobResultsRawParamsFormat string
+
+// ListProvidersParams defines parameters for ListProviders.
+type ListProvidersParams struct {
+	// IncludeDecommissioned Include decommissioned providers in the response
+	IncludeDecommissioned *bool `form:"include_decommissioned,omitempty" json:"include_decommissioned,omitempty"`
+}
 
 // ListSchemasParams defines parameters for ListSchemas.
 type ListSchemasParams struct {
