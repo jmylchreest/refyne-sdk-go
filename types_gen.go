@@ -16,16 +16,16 @@ const (
 
 // Defines values for CleanerOptionsInputOutput.
 const (
-	CleanerOptionsInputOutputHtml     CleanerOptionsInputOutput = "html"
-	CleanerOptionsInputOutputMarkdown CleanerOptionsInputOutput = "markdown"
-	CleanerOptionsInputOutputText     CleanerOptionsInputOutput = "text"
+	Html     CleanerOptionsInputOutput = "html"
+	Markdown CleanerOptionsInputOutput = "markdown"
+	Text     CleanerOptionsInputOutput = "text"
 )
 
 // Defines values for CleanerOptionsInputPreset.
 const (
-	CleanerOptionsInputPresetAggressive CleanerOptionsInputPreset = "aggressive"
-	CleanerOptionsInputPresetDefault    CleanerOptionsInputPreset = "default"
-	CleanerOptionsInputPresetMinimal    CleanerOptionsInputPreset = "minimal"
+	Aggressive CleanerOptionsInputPreset = "aggressive"
+	Default    CleanerOptionsInputPreset = "default"
+	Minimal    CleanerOptionsInputPreset = "minimal"
 )
 
 // Defines values for CrawlOptionsFetchMode.
@@ -53,20 +53,6 @@ const (
 	ExtractInputBodyFetchModeAuto    ExtractInputBodyFetchMode = "auto"
 	ExtractInputBodyFetchModeDynamic ExtractInputBodyFetchMode = "dynamic"
 	ExtractInputBodyFetchModeStatic  ExtractInputBodyFetchMode = "static"
-)
-
-// Defines values for JobCleanerOptionsInputOutput.
-const (
-	JobCleanerOptionsInputOutputHtml     JobCleanerOptionsInputOutput = "html"
-	JobCleanerOptionsInputOutputMarkdown JobCleanerOptionsInputOutput = "markdown"
-	JobCleanerOptionsInputOutputText     JobCleanerOptionsInputOutput = "text"
-)
-
-// Defines values for JobCleanerOptionsInputPreset.
-const (
-	JobCleanerOptionsInputPresetAggressive JobCleanerOptionsInputPreset = "aggressive"
-	JobCleanerOptionsInputPresetDefault    JobCleanerOptionsInputPreset = "default"
-	JobCleanerOptionsInputPresetMinimal    JobCleanerOptionsInputPreset = "minimal"
 )
 
 // Defines values for LLMConfigInputProvider.
@@ -323,21 +309,6 @@ type CleanerResponse struct {
 	Options *[]CleanerOptionResponse `json:"options"`
 }
 
-// CrawlInlineWebhookInput defines model for CrawlInlineWebhookInput.
-type CrawlInlineWebhookInput struct {
-	// Events Event types to subscribe to (empty for all)
-	Events *[]string `json:"events"`
-
-	// Headers Custom headers
-	Headers *[]CrawlWebhookHeaderInput `json:"headers"`
-
-	// Secret Secret for HMAC-SHA256 signature
-	Secret *string `json:"secret,omitempty"`
-
-	// Url Webhook URL
-	Url string `json:"url"`
-}
-
 // CrawlJobResponseBody defines model for CrawlJobResponseBody.
 type CrawlJobResponseBody struct {
 	// CostUsd Total USD cost charged (sync mode)
@@ -492,31 +463,22 @@ type CrawlOptionsOutput struct {
 	MaxPages *int64 `json:"max_pages,omitempty"`
 }
 
-// CrawlWebhookHeaderInput defines model for CrawlWebhookHeaderInput.
-type CrawlWebhookHeaderInput struct {
-	// Name Header name
-	Name string `json:"name"`
-
-	// Value Header value
-	Value string `json:"value"`
-}
-
 // CreateCrawlJobInputBody defines model for CreateCrawlJobInputBody.
 type CreateCrawlJobInputBody struct {
 	// CaptureDebug Enable debug capture to store raw LLM request/response for troubleshooting
 	CaptureDebug *bool `json:"capture_debug,omitempty"`
 
 	// CleanerChain Content cleaner chain (default: [markdown])
-	CleanerChain *[]JobCleanerConfigInput `json:"cleaner_chain"`
-	LlmConfig    *LLMConfigInput          `json:"llm_config,omitempty"`
-	Options      *CrawlOptions            `json:"options,omitempty"`
+	CleanerChain *[]CleanerConfigInput `json:"cleaner_chain"`
+	LlmConfig    *LLMConfigInput       `json:"llm_config,omitempty"`
+	Options      *CrawlOptions         `json:"options,omitempty"`
 
 	// Schema Extraction instructions - either a structured schema (YAML/JSON with 'name' and 'fields') or freeform natural language prompt. The API auto-detects the format.
 	Schema interface{} `json:"schema"`
 
 	// Url Seed URL to start crawling from
-	Url     string                   `json:"url"`
-	Webhook *CrawlInlineWebhookInput `json:"webhook,omitempty"`
+	Url     string              `json:"url"`
+	Webhook *InlineWebhookInput `json:"webhook,omitempty"`
 
 	// WebhookId ID of a saved webhook to call on job events
 	WebhookId *string `json:"webhook_id,omitempty"`
@@ -1109,49 +1071,6 @@ type InlineWebhookInput struct {
 	// Url Webhook URL
 	Url string `json:"url"`
 }
-
-// JobCleanerConfigInput defines model for JobCleanerConfigInput.
-type JobCleanerConfigInput struct {
-	// Name Cleaner name (noop, refyne)
-	Name    string                  `json:"name"`
-	Options *JobCleanerOptionsInput `json:"options,omitempty"`
-}
-
-// JobCleanerOptionsInput defines model for JobCleanerOptionsInput.
-type JobCleanerOptionsInput struct {
-	// BaseUrl Base URL for resolving relative links
-	BaseUrl *string `json:"base_url,omitempty"`
-
-	// ExtractHeadings Extract heading structure to frontmatter (markdown)
-	ExtractHeadings *bool `json:"extract_headings,omitempty"`
-
-	// ExtractImages Extract images to frontmatter with {{IMG_001}} placeholders (markdown)
-	ExtractImages *bool `json:"extract_images,omitempty"`
-
-	// IncludeFrontmatter Prepend YAML frontmatter with metadata (markdown output)
-	IncludeFrontmatter *bool `json:"include_frontmatter,omitempty"`
-
-	// KeepSelectors CSS selectors for elements to always keep
-	KeepSelectors *[]string `json:"keep_selectors"`
-
-	// Output Output format: html, text, or markdown
-	Output *JobCleanerOptionsInputOutput `json:"output,omitempty"`
-
-	// Preset Preset: default, minimal, or aggressive
-	Preset *JobCleanerOptionsInputPreset `json:"preset,omitempty"`
-
-	// RemoveSelectors CSS selectors for elements to remove
-	RemoveSelectors *[]string `json:"remove_selectors"`
-
-	// ResolveUrls Resolve relative URLs to absolute using base_url
-	ResolveUrls *bool `json:"resolve_urls,omitempty"`
-}
-
-// JobCleanerOptionsInputOutput Output format: html, text, or markdown
-type JobCleanerOptionsInputOutput string
-
-// JobCleanerOptionsInputPreset Preset: default, minimal, or aggressive
-type JobCleanerOptionsInputPreset string
 
 // JobQueueStats defines model for JobQueueStats.
 type JobQueueStats struct {
