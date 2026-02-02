@@ -393,7 +393,7 @@ type CrawlMapEntry struct {
 
 // CrawlOptions defines model for CrawlOptions.
 type CrawlOptions struct {
-	// Concurrency Concurrent extraction requests
+	// Concurrency Concurrent extraction requests per job
 	Concurrency *int64 `json:"concurrency,omitempty"`
 
 	// Delay Delay between requests (e.g., 500ms, 1s, 2s)
